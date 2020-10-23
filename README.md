@@ -26,8 +26,8 @@ information [here](https://rosetta-api.org).
 
 ## Features
 * Comprehensive tracking of all ETH balance changes
-* Stateless, offline, curve-based transaction construction (with checksum validation)
-* Atomic balance lookups using Geth's GraphQL Endpoint
+* Stateless, offline, curve-based transaction construction (with address checksum validation)
+* Atomic balance lookups using go-ethereum's GraphQL Endpoint
 * Idempotent access to all transaction traces and receipts
 
 ## Usage
@@ -117,10 +117,10 @@ and run one of the following commands:
 * `rosetta-cli check:data --configuration-file rosetta-cli-conf/mainnet/config.json`
 
 ## Future Work
+* Add ERC-20 Rosetta Module to enable reading ERC-20 token transfers and transaction construction
 * [Rosetta API `/mempool/*`](https://www.rosetta-api.org/docs/MempoolApi.html) implementation
 * Add more methods to the `/call` endpoint (currently only support `eth_getTransactionReceipt`
 * Add CI test using `rosetta-cli` to run on each PR (likely on a regtest network)
-* Add ERC-20 Rosetta Module to enable reading ERC-20 token transfers and transaction construction
 
 _Please reach out on our [community](https://community.rosetta-api.org) if you want to tackle anything on this list!_
 
