@@ -1,0 +1,39 @@
+{
+    "block": {
+        "block_identifier": {
+            "index": 10992,
+            "hash": "0xba9ded5ca1ec9adb9451bf062c9de309d9552fa0f0254a7b982d3daf7ae436ae"
+        },
+        "parent_block_identifier": {
+            "index": 10991,
+            "hash": "0x4cd21f49705529e2628f8ae1a248bcd0e3cafd21bf6d741bdee2820af82cff95"
+        },
+        "timestamp": 1479731741000,
+        "transactions": [
+            {
+                "transaction_identifier": {
+                    "hash": "0xba9ded5ca1ec9adb9451bf062c9de309d9552fa0f0254a7b982d3daf7ae436ae"
+                },
+                "operations": [
+                    {
+                        "operation_identifier": {
+                            "index": 0
+                        },
+                        "type": "MINER_REWARD",
+                        "status": "SUCCESS",
+                        "account": {
+                            "address": "0x334391Aa808257952A462d1475562Ee2106a6C90"
+                        },
+                        "amount": {
+                            "value": "5000000000000000000",
+                            "currency": {
+                                "symbol": "ETH",
+                                "decimals": 18
+                            }
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+}

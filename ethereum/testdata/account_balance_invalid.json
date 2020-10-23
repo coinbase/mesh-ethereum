@@ -1,0 +1,13 @@
+{
+  "errors": [
+    {
+      "message": "hex string of odd length"
+    }
+  ],
+  "data": {
+    "block": {
+      "hash": "0x9b3483b52f88228eae8500cafdd61f129ed6803b7d4b37082af5ca1d299e8e04",
+      "number": "0x880fc5"
+    }
+  }
+}

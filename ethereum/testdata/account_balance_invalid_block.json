@@ -1,0 +1,13 @@
+{
+  "errors": [
+    {
+      "message": "header for hash not found",
+      "path": [
+        "block"
+      ]
+    }
+  ],
+  "data": {
+    "block": null
+  }
+}
