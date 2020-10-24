@@ -1,0 +1,51 @@
+[
+  {
+    "enode": "enode://5654cc39fd278c994c451434dfa7b1a44977c52018a87e911368b54daf795955d5a2dc2ece98be5a7e8d0eb245c8ef573c92e04e8b15363f9c713a8127fe7c7b@35.183.116.112:57510",
+    "id": "16dedaa93519f9ba41a50d77876aae4bfcddfa7cecf232b9abe3ab5bf0b871f3",
+    "name": "Geth/v1.9.22-stable-c71a7e26/linux-amd64/go1.15",
+    "caps": [
+      "eth/63",
+      "eth/64",
+      "eth/65"
+    ],
+    "network": {
+      "localAddress": "172.31.2.163:30303",
+      "remoteAddress": "35.183.116.112:57510",
+      "inbound": true,
+      "trusted": false,
+      "static": false
+    },
+    "protocols": {
+      "eth": {
+        "difficulty": 31779242235308530,
+        "head": "0x4a01c35e3e2627bf5a735bc9c7f336cb1e6450f93955473008ff64cf01feeef8",
+        "version": 65
+      }
+    }
+  },
+  {
+    "enr": "enr:-Je4QICGSLfIHa7vX3bdWnKqWIS7YwmLUP6JVqU5nBhxPpH_X_Uz1pZwVS8a48uESHay1nvz9FtxLYFftpMr3wvFZJ4Qg2V0aMfGhGcn75CAgmlkgnY0gmlwhK6Beg2Jc2VjcDI1NmsxoQO-rRJ4FVv6vdUfBKboljVtovVoeqH1UL68VAgoV5UiuIN0Y3CCdl-DdWRwgnZf",
+    "enode": "enode://bead1278155bfabdd51f04a6e896356da2f5687aa1f550bebc540828579522b87e22c67edf90efa651582e40c8c8037eb0f998208cab4a69b52c5e3387671b59@174.129.122.13:30303",
+    "id": "1b75a634fbc9198d73413a0ced02837707d1fd09e4e90b8b90a0abac57113299",
+    "name": "Geth/v1.9.15-omnibus-75eb5240/linux-amd64/go1.14.4",
+    "caps": [
+      "eth/63",
+      "eth/64",
+      "eth/65"
+    ],
+    "network": {
+      "localAddress": "172.31.2.163:37908",
+      "remoteAddress": "174.129.122.13:30303",
+      "inbound": false,
+      "trusted": false,
+      "static": false
+    },
+    "protocols": {
+      "eth": {
+        "difficulty": 31779248439556308,
+        "head": "0x562415e43630bb6d79176ea2fa35ff2a54cee276b678b755831886b1029911bd",
+        "version": 65
+      }
+    }
+  }
+]

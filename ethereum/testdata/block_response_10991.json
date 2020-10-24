@@ -1,0 +1,56 @@
+{
+    "block": {
+        "block_identifier": {
+            "index": 10991,
+            "hash": "0x4cd21f49705529e2628f8ae1a248bcd0e3cafd21bf6d741bdee2820af82cff95"
+        },
+        "parent_block_identifier": {
+            "index": 10990,
+            "hash": "0x830d480882e2201d745b15a69005800ef2ec1cac555e2382f5d80c36a196e44e"
+        },
+        "timestamp": 1479731735000,
+        "transactions": [
+            {
+                "transaction_identifier": {
+                    "hash": "0x4cd21f49705529e2628f8ae1a248bcd0e3cafd21bf6d741bdee2820af82cff95"
+                },
+                "operations": [
+                    {
+                        "operation_identifier": {
+                            "index": 0
+                        },
+                        "type": "MINER_REWARD",
+                        "status": "SUCCESS",
+                        "account": {
+                            "address": "0x462591cc23A9fB4e508006A556474db04b0e4116"
+                        },
+                        "amount": {
+                            "value": "5156250000000000000",
+                            "currency": {
+                                "symbol": "ETH",
+                                "decimals": 18
+                            }
+                        }
+                    },
+                    {
+                        "operation_identifier": {
+                            "index": 1
+                        },
+                        "type": "UNCLE_REWARD",
+                        "status": "SUCCESS",
+                        "account": {
+                            "address": "0xa24D28D30ee9711149241510Ce66e8791a8043FA"
+                        },
+                        "amount": {
+                            "value": "3750000000000000000",
+                            "currency": {
+                                "symbol": "ETH",
+                                "decimals": 18
+                            }
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+}
