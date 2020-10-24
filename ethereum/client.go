@@ -317,7 +317,7 @@ func (ec *Client) getBlock(
 		return nil, nil, ethereum.NotFound
 	}
 
-	// Decode header and transactions.
+	// Decode header and transactions
 	var head types.Header
 	var body rpcBlock
 	if err := json.Unmarshal(raw, &head); err != nil {
@@ -332,7 +332,17 @@ func (ec *Client) getBlock(
 		return nil, nil, fmt.Errorf("%w: unable to get uncles", err)
 	}
 
+	// Get all transaction receipts
+	receipts, err := ec.getBlockReceipts(ctx, body.Hash, body.Transactions)
+	if err != nil {
+		return nil, nil, fmt.Errorf("%w: could not get receipts for %x", err, body.Hash[:])
+	}
+
 	// Get block traces (not possible to make idempotent block transaction trace requests)
+	//
+	// We fetch traces last because we want to avoid limiting the number of other
+	// block-related data fetches we perform concurrently (we limit the number of
+	// concurrent traces that are computed to 16 to avoid overwhelming geth).
 	var traces []*rpcCall
 	var rawTraces []*rpcRawCall
 	var addTraces bool
@@ -344,13 +354,7 @@ func (ec *Client) getBlock(
 		}
 	}
 
-	// Get all transaction receipts
-	receipts, err := ec.getBlockReceipts(ctx, body.Hash, body.Transactions)
-	if err != nil {
-		return nil, nil, fmt.Errorf("%w: could not get receipts for %x", err, body.Hash[:])
-	}
-
-	// Convert all txs to formatted txs
+	// Convert all txs to loaded txs
 	txs := make([]*types.Transaction, len(body.Transactions))
 	loadedTxs := make([]*loadedTransaction, len(body.Transactions))
 	for i, tx := range body.Transactions {
