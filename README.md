@@ -68,6 +68,12 @@ docker run -d --rm --ulimit "nofile=100000:100000" -v "$(pwd)/ethereum-data:/dat
 ```
 _If you cloned the repository, you can run `make run-mainnet-online`._
 
+#### Mainnet:Online (Remote)
+```text
+docker run -d --rm --ulimit "nofile=100000:100000" -e "MODE=ONLINE" -e "NETWORK=MAINNET" -e "PORT=8080" -e "GETH=<NODE URL>" -p 8080:8080 -p 30303:30303 rosetta-ethereum:latest
+```
+_If you cloned the repository, you can run `make run-mainnet-remote geth=<NODE URL>`._
+
 #### Mainnet:Offline
 ```text
 docker run -d --rm -e "MODE=OFFLINE" -e "NETWORK=MAINNET" -e "PORT=8081" -p 8081:8081 rosetta-ethereum:latest
@@ -79,6 +85,12 @@ _If you cloned the repository, you can run `make run-mainnet-offline`._
 docker run -d --rm --ulimit "nofile=100000:100000" -v "$(pwd)/ethereum-data:/data" -e "MODE=ONLINE" -e "NETWORK=TESTNET" -e "PORT=8080" -p 8080:8080 -p 30303:30303 rosetta-ethereum:latest
 ```
 _If you cloned the repository, you can run `make run-testnet-online`._
+
+#### Testnet:Online (Remote)
+```text
+docker run -d --rm --ulimit "nofile=100000:100000" -e "MODE=ONLINE" -e "NETWORK=TESTNET" -e "PORT=8080" -e "GETH=<NODE URL>" -p 8080:8080 -p 30303:30303 rosetta-ethereum:latest
+```
+_If you cloned the repository, you can run `make run-testnet-remote geth=<NODE URL>`._
 
 #### Testnet:Offline
 ```text
@@ -119,7 +131,7 @@ and run one of the following commands:
 ## Future Work
 * Add ERC-20 Rosetta Module to enable reading ERC-20 token transfers and transaction construction
 * [Rosetta API `/mempool/*`](https://www.rosetta-api.org/docs/MempoolApi.html) implementation
-* Add more methods to the `/call` endpoint (currently only support `eth_getTransactionReceipt`
+* Add more methods to the `/call` endpoint (currently only support `eth_getTransactionReceipt`)
 * Add CI test using `rosetta-cli` to run on each PR (likely on a regtest network)
 
 _Please reach out on our [community](https://community.rosetta-api.org) if you want to tackle anything on this list!_
