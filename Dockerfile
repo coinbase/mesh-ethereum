@@ -20,8 +20,8 @@ RUN mkdir -p /app \
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y curl make gcc g++ git
-ENV GOLANG_VERSION 1.15.2
-ENV GOLANG_DOWNLOAD_SHA256 b49fda1ca29a1946d6bb2a5a6982cf07ccd2aba849289508ee0f9918f6bb4552
+ENV GOLANG_VERSION 1.15.5
+ENV GOLANG_DOWNLOAD_SHA256 9a58494e8da722c3aef248c9227b0e9c528c7318309827780f16220998180a0d
 ENV GOLANG_DOWNLOAD_URL https://golang.org/dl/go$GOLANG_VERSION.linux-amd64.tar.gz
 
 RUN curl -fsSL "$GOLANG_DOWNLOAD_URL" -o golang.tar.gz \
@@ -36,10 +36,10 @@ RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
 # Compile geth
 FROM golang-builder as geth-builder
 
-# VERSION: go-ethereum v.1.9.23
+# VERSION: go-ethereum v.1.9.24
 RUN git clone https://github.com/ethereum/go-ethereum \
   && cd go-ethereum \
-  && git checkout 8c2f271528f9cccf541c6ea1c022e98407f26872
+  && git checkout cc05b050df5f88e80bb26aaf6d2f339c49c2d702
 
 RUN cd go-ethereum \
   && make geth
