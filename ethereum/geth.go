@@ -43,7 +43,7 @@ func logPipe(pipe io.ReadCloser, identifier string) error {
 			return err
 		}
 
-		message := strings.Replace(str, "\n", "", -1)
+		message := strings.ReplaceAll(str, "\n", "")
 		log.Println(identifier, message)
 	}
 }
