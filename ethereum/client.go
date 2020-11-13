@@ -599,7 +599,7 @@ func traceOps(calls []*flatCall, startIndex int) []*RosettaTypes.Operation { // 
 					Index: int64(len(ops) + startIndex),
 				},
 				Type:   trace.Type,
-				Status: opStatus,
+				Status: RosettaTypes.String(opStatus),
 				Account: &RosettaTypes.AccountIdentifier{
 					Address: from,
 				},
@@ -660,7 +660,7 @@ func traceOps(calls []*flatCall, startIndex int) []*RosettaTypes.Operation { // 
 					},
 				},
 				Type:   trace.Type,
-				Status: opStatus,
+				Status: RosettaTypes.String(opStatus),
 				Account: &RosettaTypes.AccountIdentifier{
 					Address: to,
 				},
@@ -699,7 +699,7 @@ func traceOps(calls []*flatCall, startIndex int) []*RosettaTypes.Operation { // 
 				Index: ops[len(ops)-1].OperationIdentifier.Index + 1,
 			},
 			Type:   DestructOpType,
-			Status: SuccessStatus,
+			Status: RosettaTypes.String(SuccessStatus),
 			Account: &RosettaTypes.AccountIdentifier{
 				Address: acct,
 			},
@@ -762,7 +762,7 @@ func feeOps(tx *loadedTransaction) []*RosettaTypes.Operation {
 				Index: 0,
 			},
 			Type:   FeeOpType,
-			Status: SuccessStatus,
+			Status: RosettaTypes.String(SuccessStatus),
 			Account: &RosettaTypes.AccountIdentifier{
 				Address: MustChecksum(tx.From.String()),
 			},
@@ -782,7 +782,7 @@ func feeOps(tx *loadedTransaction) []*RosettaTypes.Operation {
 				},
 			},
 			Type:   FeeOpType,
-			Status: SuccessStatus,
+			Status: RosettaTypes.String(SuccessStatus),
 			Account: &RosettaTypes.AccountIdentifier{
 				Address: MustChecksum(tx.Miner),
 			},
@@ -981,7 +981,7 @@ func (ec *Client) blockRewardTransaction(
 			Index: 0,
 		},
 		Type:   MinerRewardOpType,
-		Status: SuccessStatus,
+		Status: RosettaTypes.String(SuccessStatus),
 		Account: &RosettaTypes.AccountIdentifier{
 			Address: MustChecksum(miner),
 		},
@@ -1008,7 +1008,7 @@ func (ec *Client) blockRewardTransaction(
 				Index: int64(len(ops)),
 			},
 			Type:   UncleRewardOpType,
-			Status: SuccessStatus,
+			Status: RosettaTypes.String(SuccessStatus),
 			Account: &RosettaTypes.AccountIdentifier{
 				Address: MustChecksum(uncleMiner),
 			},

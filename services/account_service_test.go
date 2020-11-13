@@ -38,6 +38,11 @@ func TestAccountBalance_Offline(t *testing.T) {
 	assert.Nil(t, bal)
 	assert.Equal(t, ErrUnavailableOffline.Code, err.Code)
 
+	coins, err := servicer.AccountCoins(ctx, nil)
+	assert.Nil(t, coins)
+	assert.Equal(t, ErrUnimplemented.Code, err.Code)
+	assert.Equal(t, ErrUnimplemented.Message, err.Message)
+
 	mockClient.AssertExpectations(t)
 }
 
@@ -47,6 +52,7 @@ func TestAccountBalance_Online(t *testing.T) {
 	}
 	mockClient := &mocks.Client{}
 	servicer := NewAccountAPIService(cfg, mockClient)
+
 	ctx := context.Background()
 
 	account := &types.AccountIdentifier{
@@ -80,8 +86,12 @@ func TestAccountBalance_Online(t *testing.T) {
 		BlockIdentifier:   types.ConstructPartialBlockIdentifier(block),
 	})
 	assert.Nil(t, err)
-
 	assert.Equal(t, resp, bal)
+
+	coins, err := servicer.AccountCoins(ctx, nil)
+	assert.Nil(t, coins)
+	assert.Equal(t, ErrUnimplemented.Code, err.Code)
+	assert.Equal(t, ErrUnimplemented.Message, err.Message)
 
 	mockClient.AssertExpectations(t)
 }

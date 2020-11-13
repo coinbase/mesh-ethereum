@@ -113,6 +113,9 @@ const (
 
 	// MainnetGethArguments are the arguments to start a mainnet geth instance.
 	MainnetGethArguments = `--config=/app/ethereum/geth.toml --gcmode=archive --graphql`
+
+	// IncludeMempoolCoins does not apply to rosetta-ethereum as it is not UTXO-based.
+	IncludeMempoolCoins = false
 )
 
 var (

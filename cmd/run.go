@@ -69,6 +69,7 @@ func runRunCmd(cmd *cobra.Command, args []string) error {
 		ethereum.HistoricalBalanceSupported,
 		[]*types.NetworkIdentifier{cfg.Network},
 		ethereum.CallMethods,
+		ethereum.IncludeMempoolCoins,
 	)
 	if err != nil {
 		return fmt.Errorf("%w: could not initialize server asserter", err)
