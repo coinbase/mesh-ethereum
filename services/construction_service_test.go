@@ -86,7 +86,7 @@ func TestConstructionService(t *testing.T) {
 	}, deriveResponse)
 
 	// Test Preprocess
-	intent := `[{"operation_identifier":{"index":0},"type":"CALL","status":"","account":{"address":"0xe3a5B4d7f79d64088C8d4ef153A7DDe2B2d47309"},"amount":{"value":"-42894881044106498","currency":{"symbol":"ETH","decimals":18}}},{"operation_identifier":{"index":1},"type":"CALL","status":"","account":{"address":"0x57B414a0332B5CaB885a451c2a28a07d1e9b8a8d"},"amount":{"value":"42894881044106498","currency":{"symbol":"ETH","decimals":18}}}]` // nolint
+	intent := `[{"operation_identifier":{"index":0},"type":"CALL","account":{"address":"0xe3a5B4d7f79d64088C8d4ef153A7DDe2B2d47309"},"amount":{"value":"-42894881044106498","currency":{"symbol":"ETH","decimals":18}}},{"operation_identifier":{"index":1},"type":"CALL","account":{"address":"0x57B414a0332B5CaB885a451c2a28a07d1e9b8a8d"},"amount":{"value":"42894881044106498","currency":{"symbol":"ETH","decimals":18}}}]` // nolint
 	var ops []*types.Operation
 	assert.NoError(t, json.Unmarshal([]byte(intent), &ops))
 	preprocessResponse, err := servicer.ConstructionPreprocess(
@@ -157,7 +157,7 @@ func TestConstructionService(t *testing.T) {
 	}, payloadsResponse)
 
 	// Test Parse Unsigned
-	parseOpsRaw := `[{"operation_identifier":{"index":0},"type":"CALL","status":"","account":{"address":"0xe3a5B4d7f79d64088C8d4ef153A7DDe2B2d47309"},"amount":{"value":"-42894881044106498","currency":{"symbol":"ETH","decimals":18}}},{"operation_identifier":{"index":1},"related_operations":[{"index":0}],"type":"CALL","status":"","account":{"address":"0x57B414a0332B5CaB885a451c2a28a07d1e9b8a8d"},"amount":{"value":"42894881044106498","currency":{"symbol":"ETH","decimals":18}}}]` // nolint
+	parseOpsRaw := `[{"operation_identifier":{"index":0},"type":"CALL","account":{"address":"0xe3a5B4d7f79d64088C8d4ef153A7DDe2B2d47309"},"amount":{"value":"-42894881044106498","currency":{"symbol":"ETH","decimals":18}}},{"operation_identifier":{"index":1},"related_operations":[{"index":0}],"type":"CALL","account":{"address":"0x57B414a0332B5CaB885a451c2a28a07d1e9b8a8d"},"amount":{"value":"42894881044106498","currency":{"symbol":"ETH","decimals":18}}}]` // nolint
 	var parseOps []*types.Operation
 	assert.NoError(t, json.Unmarshal([]byte(parseOpsRaw), &parseOps))
 	parseUnsignedResponse, err := servicer.ConstructionParse(ctx, &types.ConstructionParseRequest{
