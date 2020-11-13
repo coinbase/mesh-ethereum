@@ -25,7 +25,7 @@ import (
 
 const (
 	// NodeVersion is the version of geth we are using.
-	NodeVersion = "1.9.23"
+	NodeVersion = "1.9.24"
 
 	// Blockchain is Ethereum.
 	Blockchain string = "Ethereum"
@@ -121,9 +121,6 @@ const (
 var (
 	// TestnetGethArguments are the arguments to start a ropsten geth instance.
 	TestnetGethArguments = fmt.Sprintf("%s --ropsten", MainnetGethArguments)
-
-	// MiddlewareVersion is the version of rosetta-ethereum.
-	MiddlewareVersion = "0.0.1"
 
 	// MainnetGenesisBlockIdentifier is the *types.BlockIdentifier
 	// of the mainnet genesis block.

@@ -71,6 +71,9 @@ const (
 	// a running geth node. This is used
 	// when GethEnv is not populated.
 	DefaultGethURL = "http://localhost:8545"
+
+	// MiddlewareVersion is the version of rosetta-ethereum.
+	MiddlewareVersion = "0.0.2"
 )
 
 // Configuration determines how

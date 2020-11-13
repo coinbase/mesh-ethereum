@@ -60,7 +60,7 @@ func (s *NetworkAPIService) NetworkOptions(
 		Version: &types.Version{
 			NodeVersion:       ethereum.NodeVersion,
 			RosettaVersion:    types.RosettaAPIVersion,
-			MiddlewareVersion: &ethereum.MiddlewareVersion,
+			MiddlewareVersion: types.String(configuration.MiddlewareVersion),
 		},
 		Allow: &types.Allow{
 			Errors:                  Errors,
