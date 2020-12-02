@@ -73,7 +73,7 @@ const (
 	DefaultGethURL = "http://localhost:8545"
 
 	// MiddlewareVersion is the version of rosetta-ethereum.
-	MiddlewareVersion = "0.0.2"
+	MiddlewareVersion = "0.0.3"
 )
 
 // Configuration determines how
