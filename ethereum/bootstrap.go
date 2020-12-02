@@ -19,7 +19,7 @@ import (
 	"math/big"
 	"sort"
 
-	"github.com/coinbase/rosetta-sdk-go/storage"
+	"github.com/coinbase/rosetta-sdk-go/storage/modules"
 	"github.com/coinbase/rosetta-sdk-go/types"
 	"github.com/coinbase/rosetta-sdk-go/utils"
 )
@@ -54,7 +54,7 @@ func GenerateBootstrapFile(genesisFile string, outputFile string) error {
 	sort.Strings(keys)
 
 	// Write to file
-	balances := []*storage.BootstrapBalance{}
+	balances := []*modules.BootstrapBalance{}
 	for _, k := range keys {
 		v := formattedAllocations[k]
 		bal, ok := new(big.Int).SetString(v[2:], 16)
@@ -66,7 +66,7 @@ func GenerateBootstrapFile(genesisFile string, outputFile string) error {
 			continue
 		}
 
-		balances = append(balances, &storage.BootstrapBalance{
+		balances = append(balances, &modules.BootstrapBalance{
 			Account: &types.AccountIdentifier{
 				Address: k,
 			},
