@@ -114,7 +114,7 @@ func (ec *Client) Status(ctx context.Context) (
 		targetIndex := int64(progress.HighestBlock)
 
 		syncStatus = &RosettaTypes.SyncStatus{
-			CurrentIndex: currentIndex,
+			CurrentIndex: &currentIndex,
 			TargetIndex:  &targetIndex,
 		}
 	}

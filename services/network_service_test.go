@@ -27,7 +27,7 @@ import (
 )
 
 var (
-	middlewareVersion     = "0.0.3"
+	middlewareVersion     = "0.0.4"
 	defaultNetworkOptions = &types.NetworkOptionsResponse{
 		Version: &types.Version{
 			RosettaVersion:    types.RosettaAPIVersion,
@@ -100,7 +100,7 @@ func TestNetworkEndpoints_Online(t *testing.T) {
 	currentTime := int64(1000000000000)
 
 	syncStatus := &types.SyncStatus{
-		CurrentIndex: 100,
+		CurrentIndex: types.Int64(100),
 	}
 
 	peers := []*types.Peer{
