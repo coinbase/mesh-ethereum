@@ -39,14 +39,6 @@ import (
 	"golang.org/x/sync/semaphore"
 )
 
-func int64Pointer(i int64) *int64 {
-	return &i
-}
-
-func stringPointer(s string) *string {
-	return &s
-}
-
 func TestStatus_NotReady(t *testing.T) {
 	mockJSONRPC := &mocks.JSONRPC{}
 	mockGraphQL := &mocks.GraphQL{}
@@ -274,8 +266,8 @@ func TestStatus_Syncing(t *testing.T) {
 	}, block)
 	assert.Equal(t, int64(1603225195000), timestamp)
 	assert.Equal(t, &RosettaTypes.SyncStatus{
-		CurrentIndex: 25,
-		TargetIndex:  int64Pointer(8916760),
+		CurrentIndex: RosettaTypes.Int64(25),
+		TargetIndex:  RosettaTypes.Int64(8916760),
 	}, syncStatus)
 	assert.Equal(t, []*RosettaTypes.Peer{
 		{
@@ -428,10 +420,10 @@ func TestBalance_Historical_Hash(t *testing.T) {
 			Address: "0x2f93B2f047E05cdf602820Ac4B3178efc2b43D55",
 		},
 		&RosettaTypes.PartialBlockIdentifier{
-			Hash: stringPointer(
+			Hash: RosettaTypes.String(
 				"0x9999286598edf07606228ba0233736e544a086a8822c61f9db3706887fc25dda",
 			),
-			Index: int64Pointer(8165),
+			Index: RosettaTypes.Int64(8165),
 		},
 	)
 	assert.Equal(t, &RosettaTypes.AccountBalanceResponse{
@@ -496,7 +488,7 @@ func TestBalance_Historical_Index(t *testing.T) {
 			Address: "0x2f93B2f047E05cdf602820Ac4B3178efc2b43D55",
 		},
 		&RosettaTypes.PartialBlockIdentifier{
-			Index: int64Pointer(8165),
+			Index: RosettaTypes.Int64(8165),
 		},
 	)
 	assert.Equal(t, &RosettaTypes.AccountBalanceResponse{
@@ -605,7 +597,7 @@ func TestBalance_InvalidHash(t *testing.T) {
 			Address: "0x2f93B2f047E05cdf602820Ac4B3178efc2b43D55",
 		},
 		&RosettaTypes.PartialBlockIdentifier{
-			Hash: stringPointer(
+			Hash: RosettaTypes.String(
 				"0x7d2a2713026a0e66f131878de2bb2df2fff6c24562c1df61ec0265e5fedf2626",
 			),
 		},
@@ -879,7 +871,7 @@ func TestBlock_Hash(t *testing.T) {
 	resp, err := c.Block(
 		ctx,
 		&RosettaTypes.PartialBlockIdentifier{
-			Hash: stringPointer(
+			Hash: RosettaTypes.String(
 				"0xba9ded5ca1ec9adb9451bf062c9de309d9552fa0f0254a7b982d3daf7ae436ae",
 			),
 		},
@@ -955,7 +947,7 @@ func TestBlock_Index(t *testing.T) {
 	resp, err := c.Block(
 		ctx,
 		&RosettaTypes.PartialBlockIdentifier{
-			Index: int64Pointer(10992),
+			Index: RosettaTypes.Int64(10992),
 		},
 	)
 	assert.Equal(t, correct.Block, resp)
@@ -1071,7 +1063,7 @@ func TestBlock_10994(t *testing.T) {
 	resp, err := c.Block(
 		ctx,
 		&RosettaTypes.PartialBlockIdentifier{
-			Index: int64Pointer(10994),
+			Index: RosettaTypes.Int64(10994),
 		},
 	)
 	assert.NoError(t, err)
@@ -1180,7 +1172,7 @@ func TestBlock_10991(t *testing.T) {
 	resp, err := c.Block(
 		ctx,
 		&RosettaTypes.PartialBlockIdentifier{
-			Index: int64Pointer(10991),
+			Index: RosettaTypes.Int64(10991),
 		},
 	)
 	assert.Equal(t, correct.Block, resp)
@@ -1282,7 +1274,7 @@ func TestBlock_239782(t *testing.T) {
 	resp, err := c.Block(
 		ctx,
 		&RosettaTypes.PartialBlockIdentifier{
-			Index: int64Pointer(239782),
+			Index: RosettaTypes.Int64(239782),
 		},
 	)
 	assert.NoError(t, err)
@@ -1394,7 +1386,7 @@ func TestBlock_363415(t *testing.T) {
 	resp, err := c.Block(
 		ctx,
 		&RosettaTypes.PartialBlockIdentifier{
-			Index: int64Pointer(363415),
+			Index: RosettaTypes.Int64(363415),
 		},
 	)
 	assert.NoError(t, err)
@@ -1506,7 +1498,7 @@ func TestBlock_363753(t *testing.T) {
 	resp, err := c.Block(
 		ctx,
 		&RosettaTypes.PartialBlockIdentifier{
-			Index: int64Pointer(363753),
+			Index: RosettaTypes.Int64(363753),
 		},
 	)
 	assert.NoError(t, err)
@@ -1618,7 +1610,7 @@ func TestBlock_468179(t *testing.T) {
 	resp, err := c.Block(
 		ctx,
 		&RosettaTypes.PartialBlockIdentifier{
-			Index: int64Pointer(468179),
+			Index: RosettaTypes.Int64(468179),
 		},
 	)
 	assert.NoError(t, err)
@@ -1731,7 +1723,7 @@ func TestBlock_363366(t *testing.T) {
 	resp, err := c.Block(
 		ctx,
 		&RosettaTypes.PartialBlockIdentifier{
-			Index: int64Pointer(363366),
+			Index: RosettaTypes.Int64(363366),
 		},
 	)
 	assert.NoError(t, err)
@@ -1843,7 +1835,7 @@ func TestBlock_468194(t *testing.T) {
 	resp, err := c.Block(
 		ctx,
 		&RosettaTypes.PartialBlockIdentifier{
-			Index: int64Pointer(468194),
+			Index: RosettaTypes.Int64(468194),
 		},
 	)
 	assert.NoError(t, err)
