@@ -60,10 +60,12 @@ type Client struct {
 	g GraphQL
 
 	traceSemaphore *semaphore.Weighted
+
+	skipAdminCalls bool
 }
 
 // NewClient creates a Client that from the provided url and params.
-func NewClient(url string, params *params.ChainConfig) (*Client, error) {
+func NewClient(url string, params *params.ChainConfig, skipAdminCalls bool) (*Client, error) {
 	c, err := rpc.DialHTTPWithClient(url, &http.Client{
 		Timeout: gethHTTPTimeout,
 	})
@@ -81,7 +83,7 @@ func NewClient(url string, params *params.ChainConfig) (*Client, error) {
 		return nil, fmt.Errorf("%w: unable to create GraphQL client", err)
 	}
 
-	return &Client{params, tc, c, g, semaphore.NewWeighted(maxTraceConcurrency)}, nil
+	return &Client{params, tc, c, g, semaphore.NewWeighted(maxTraceConcurrency), skipAdminCalls}, nil
 }
 
 // Close shuts down the RPC client connection.
@@ -155,6 +157,11 @@ func (ec *Client) SuggestGasPrice(ctx context.Context) (*big.Int, error) {
 // Peers retrieves all peers of the node.
 func (ec *Client) peers(ctx context.Context) ([]*RosettaTypes.Peer, error) {
 	var info []*p2p.PeerInfo
+
+	if ec.skipAdminCalls {
+		return []*RosettaTypes.Peer{}, nil
+	}
+
 	if err := ec.c.CallContext(ctx, &info, "admin_peers"); err != nil {
 		return nil, err
 	}

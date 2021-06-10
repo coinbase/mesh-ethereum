@@ -72,6 +72,11 @@ const (
 	// when GethEnv is not populated.
 	DefaultGethURL = "http://localhost:8545"
 
+	// SkipGethAdmin is an optional environment variable
+	// to skip geth `admin` calls which are typically not supported
+	// by hosted node services.
+	SkipGethAdmin = "SKIP_GETH_ADMNIN"
+
 	// MiddlewareVersion is the version of rosetta-ethereum.
 	MiddlewareVersion = "0.0.4"
 )
@@ -85,6 +90,7 @@ type Configuration struct {
 	RemoteGeth             bool
 	Port                   int
 	GethArguments          string
+	SkipGethAdmin          bool
 
 	// Block Reward Data
 	Params *params.ChainConfig
@@ -136,6 +142,16 @@ func LoadConfiguration() (*Configuration, error) {
 	if len(envGethURL) > 0 {
 		config.RemoteGeth = true
 		config.GethURL = envGethURL
+	}
+
+	config.SkipGethAdmin = false
+	envSkipGethAdmin := os.Getenv(SkipGethAdmin)
+	if len(envSkipGethAdmin) > 0 {
+		val, err := strconv.ParseBool(envSkipGethAdmin)
+		if err != nil {
+			return nil, fmt.Errorf("%w: unable to parse SKIP_GETH_ADMIN %s", err, envSkipGethAdmin)
+		}
+		config.SkipGethAdmin = val
 	}
 
 	portValue := os.Getenv(PortEnv)

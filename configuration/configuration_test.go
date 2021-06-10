@@ -17,6 +17,7 @@ package configuration
 import (
 	"errors"
 	"os"
+	"strconv"
 	"testing"
 
 	"github.com/coinbase/rosetta-ethereum/ethereum"
@@ -28,10 +29,11 @@ import (
 
 func TestLoadConfiguration(t *testing.T) {
 	tests := map[string]struct {
-		Mode    string
-		Network string
-		Port    string
-		Geth    string
+		Mode          string
+		Network       string
+		Port          string
+		Geth          string
+		SkipGethAdmin bool
 
 		cfg *Configuration
 		err error
@@ -63,13 +65,15 @@ func TestLoadConfiguration(t *testing.T) {
 				Port:                   1000,
 				GethURL:                DefaultGethURL,
 				GethArguments:          ethereum.MainnetGethArguments,
+				SkipGethAdmin:          false,
 			},
 		},
 		"all set (mainnet) + geth": {
-			Mode:    string(Online),
-			Network: Mainnet,
-			Port:    "1000",
-			Geth:    "http://blah",
+			Mode:          string(Online),
+			Network:       Mainnet,
+			Port:          "1000",
+			Geth:          "http://blah",
+			SkipGethAdmin: true,
 			cfg: &Configuration{
 				Mode: Online,
 				Network: &types.NetworkIdentifier{
@@ -82,12 +86,14 @@ func TestLoadConfiguration(t *testing.T) {
 				GethURL:                "http://blah",
 				RemoteGeth:             true,
 				GethArguments:          ethereum.MainnetGethArguments,
+				SkipGethAdmin:          true,
 			},
 		},
 		"all set (testnet)": {
-			Mode:    string(Online),
-			Network: Testnet,
-			Port:    "1000",
+			Mode:          string(Online),
+			Network:       Testnet,
+			Port:          "1000",
+			SkipGethAdmin: true,
 			cfg: &Configuration{
 				Mode: Online,
 				Network: &types.NetworkIdentifier{
@@ -99,6 +105,7 @@ func TestLoadConfiguration(t *testing.T) {
 				Port:                   1000,
 				GethURL:                DefaultGethURL,
 				GethArguments:          ethereum.TestnetGethArguments,
+				SkipGethAdmin:          true,
 			},
 		},
 		"invalid mode": {
@@ -127,6 +134,8 @@ func TestLoadConfiguration(t *testing.T) {
 			os.Setenv(NetworkEnv, test.Network)
 			os.Setenv(PortEnv, test.Port)
 			os.Setenv(GethEnv, test.Geth)
+			os.Setenv(GethEnv, test.Geth)
+			os.Setenv(SkipGethAdmin, strconv.FormatBool(test.SkipGethAdmin))
 
 			cfg, err := LoadConfiguration()
 			if test.err != nil {
