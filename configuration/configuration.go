@@ -45,6 +45,9 @@ const (
 	// Ropsten is the Ethereum Ropsten network.
 	Ropsten string = "ROPSTEN"
 
+	// Rinkeby is the Ethereum Rinkeby network.
+	Rinkeby string = "RINKEBY"
+
 	// Testnet defaults to `Ropsten` for backwards compatibility.
 	Testnet string = "TESTNET"
 
@@ -128,6 +131,14 @@ func LoadConfiguration() (*Configuration, error) {
 		config.GenesisBlockIdentifier = ethereum.RopstenGenesisBlockIdentifier
 		config.Params = params.RopstenChainConfig
 		config.GethArguments = ethereum.RopstenGethArguments
+	case Rinkeby:
+		config.Network = &types.NetworkIdentifier{
+			Blockchain: ethereum.Blockchain,
+			Network:    ethereum.RinkebyNetwork,
+		}
+		config.GenesisBlockIdentifier = ethereum.RinkebyGenesisBlockIdentifier
+		config.Params = params.RinkebyChainConfig
+		config.GethArguments = ethereum.RinkebyGethArguments
 	case "":
 		return nil, errors.New("NETWORK must be populated")
 	default:

@@ -101,6 +101,23 @@ func TestLoadConfiguration(t *testing.T) {
 				GethArguments:          ethereum.RopstenGethArguments,
 			},
 		},
+		"all set (rinkeby)": {
+			Mode:    string(Online),
+			Network: Rinkeby,
+			Port:    "1000",
+			cfg: &Configuration{
+				Mode: Online,
+				Network: &types.NetworkIdentifier{
+					Network:    ethereum.RinkebyNetwork,
+					Blockchain: ethereum.Blockchain,
+				},
+				Params:                 params.RinkebyChainConfig,
+				GenesisBlockIdentifier: ethereum.RinkebyGenesisBlockIdentifier,
+				Port:                   1000,
+				GethURL:                DefaultGethURL,
+				GethArguments:          ethereum.RinkebyGethArguments,
+			},
+		},
 		"all set (testnet)": {
 			Mode:    string(Online),
 			Network: Testnet,
