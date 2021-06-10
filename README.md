@@ -59,6 +59,8 @@ Running the following commands will start a Docker container in
 a data directory at `<working directory>/ethereum-data` and the Rosetta API accessible
 at port `8080`.
 
+The `NETWORK` environment variable can be set to `MAINNET`, `ROPSTEN`, `RINKEBY`, `GOERLI` or `TESTNET` (which defaults to `ROPSTEN`).
+
 _It is possible to run `rosetta-ethereum` using a remote node by adding
 `-e "GETH=<node url>"` to any online command._
 
