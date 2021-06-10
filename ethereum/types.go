@@ -42,6 +42,10 @@ const (
 	// in RinkebyNetworkNetworkIdentifier.
 	RinkebyNetwork string = "RinkebyNetwork"
 
+	// GoerliNetwork is the value of the network
+	// in GoerliNetworkNetworkIdentifier.
+	GoerliNetwork string = "GoerliNetwork"
+
 	// Symbol is the symbol value
 	// used in Currency.
 	Symbol = "ETH"
@@ -129,6 +133,9 @@ var (
 	// RinkebyGethArguments are the arguments to start a rinkeby geth instance.
 	RinkebyGethArguments = fmt.Sprintf("%s --rinkeby", MainnetGethArguments)
 
+	// GoerliGethArguments are the arguments to start a ropsten geth instance.
+	GoerliGethArguments = fmt.Sprintf("%s --goerli", MainnetGethArguments)
+
 	// MainnetGenesisBlockIdentifier is the *types.BlockIdentifier
 	// of the mainnet genesis block.
 	MainnetGenesisBlockIdentifier = &types.BlockIdentifier{
@@ -147,6 +154,13 @@ var (
 	// of the Ropsten genesis block.
 	RinkebyGenesisBlockIdentifier = &types.BlockIdentifier{
 		Hash:  params.RinkebyGenesisHash.Hex(),
+		Index: GenesisBlockIndex,
+	}
+
+	// GoerliGenesisBlockIdentifier is the *types.BlockIdentifier
+	// of the Goerli genesis block.
+	GoerliGenesisBlockIdentifier = &types.BlockIdentifier{
+		Hash:  params.GoerliGenesisHash.Hex(),
 		Index: GenesisBlockIndex,
 	}
 

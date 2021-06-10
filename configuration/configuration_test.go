@@ -118,6 +118,23 @@ func TestLoadConfiguration(t *testing.T) {
 				GethArguments:          ethereum.RinkebyGethArguments,
 			},
 		},
+		"all set (goerli)": {
+			Mode:    string(Online),
+			Network: Goerli,
+			Port:    "1000",
+			cfg: &Configuration{
+				Mode: Online,
+				Network: &types.NetworkIdentifier{
+					Network:    ethereum.GoerliNetwork,
+					Blockchain: ethereum.Blockchain,
+				},
+				Params:                 params.GoerliChainConfig,
+				GenesisBlockIdentifier: ethereum.GoerliGenesisBlockIdentifier,
+				Port:                   1000,
+				GethURL:                DefaultGethURL,
+				GethArguments:          ethereum.GoerliGethArguments,
+			},
+		},
 		"all set (testnet)": {
 			Mode:    string(Online),
 			Network: Testnet,

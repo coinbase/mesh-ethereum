@@ -42,11 +42,14 @@ const (
 	// Mainnet is the Ethereum Mainnet.
 	Mainnet string = "MAINNET"
 
-	// Ropsten is the Ethereum Ropsten network.
+	// Ropsten is the Ethereum Ropsten testnet.
 	Ropsten string = "ROPSTEN"
 
-	// Rinkeby is the Ethereum Rinkeby network.
+	// Rinkeby is the Ethereum Rinkeby testnet.
 	Rinkeby string = "RINKEBY"
+
+	// Goerli is the Ethereum Görli testnet.
+	Goerli string = "GOERLI"
 
 	// Testnet defaults to `Ropsten` for backwards compatibility.
 	Testnet string = "TESTNET"
@@ -139,6 +142,14 @@ func LoadConfiguration() (*Configuration, error) {
 		config.GenesisBlockIdentifier = ethereum.RinkebyGenesisBlockIdentifier
 		config.Params = params.RinkebyChainConfig
 		config.GethArguments = ethereum.RinkebyGethArguments
+	case Goerli:
+		config.Network = &types.NetworkIdentifier{
+			Blockchain: ethereum.Blockchain,
+			Network:    ethereum.GoerliNetwork,
+		}
+		config.GenesisBlockIdentifier = ethereum.GoerliGenesisBlockIdentifier
+		config.Params = params.GoerliChainConfig
+		config.GethArguments = ethereum.GoerliGethArguments
 	case "":
 		return nil, errors.New("NETWORK must be populated")
 	default:
