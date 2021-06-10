@@ -52,7 +52,7 @@ func forceMarshalMap(t *testing.T, i interface{}) map[string]interface{} {
 
 func TestConstructionService(t *testing.T) {
 	networkIdentifier = &types.NetworkIdentifier{
-		Network:    ethereum.TestnetNetwork,
+		Network:    ethereum.RopstenNetwork,
 		Blockchain: ethereum.Blockchain,
 	}
 

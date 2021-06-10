@@ -34,9 +34,9 @@ const (
 	// in MainnetNetworkIdentifier.
 	MainnetNetwork string = "Mainnet"
 
-	// TestnetNetwork is the value of the network
-	// in TestnetNetworkIdentifier.
-	TestnetNetwork string = "Ropsten"
+	// RopstenNetwork is the value of the network
+	// in RopstenNetworkIdentifier.
+	RopstenNetwork string = "Ropsten"
 
 	// Symbol is the symbol value
 	// used in Currency.
@@ -119,8 +119,8 @@ const (
 )
 
 var (
-	// TestnetGethArguments are the arguments to start a ropsten geth instance.
-	TestnetGethArguments = fmt.Sprintf("%s --ropsten", MainnetGethArguments)
+	// RopstenGethArguments are the arguments to start a ropsten geth instance.
+	RopstenGethArguments = fmt.Sprintf("%s --ropsten", MainnetGethArguments)
 
 	// MainnetGenesisBlockIdentifier is the *types.BlockIdentifier
 	// of the mainnet genesis block.
@@ -129,9 +129,9 @@ var (
 		Index: GenesisBlockIndex,
 	}
 
-	// TestnetGenesisBlockIdentifier is the *types.BlockIdentifier
-	// of the testnet genesis block.
-	TestnetGenesisBlockIdentifier = &types.BlockIdentifier{
+	// RopstenGenesisBlockIdentifier is the *types.BlockIdentifier
+	// of the Ropsten genesis block.
+	RopstenGenesisBlockIdentifier = &types.BlockIdentifier{
 		Hash:  params.RopstenGenesisHash.Hex(),
 		Index: GenesisBlockIndex,
 	}

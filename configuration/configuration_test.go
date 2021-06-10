@@ -84,6 +84,23 @@ func TestLoadConfiguration(t *testing.T) {
 				GethArguments:          ethereum.MainnetGethArguments,
 			},
 		},
+		"all set (ropsten)": {
+			Mode:    string(Online),
+			Network: Ropsten,
+			Port:    "1000",
+			cfg: &Configuration{
+				Mode: Online,
+				Network: &types.NetworkIdentifier{
+					Network:    ethereum.RopstenNetwork,
+					Blockchain: ethereum.Blockchain,
+				},
+				Params:                 params.RopstenChainConfig,
+				GenesisBlockIdentifier: ethereum.RopstenGenesisBlockIdentifier,
+				Port:                   1000,
+				GethURL:                DefaultGethURL,
+				GethArguments:          ethereum.RopstenGethArguments,
+			},
+		},
 		"all set (testnet)": {
 			Mode:    string(Online),
 			Network: Testnet,
@@ -91,19 +108,19 @@ func TestLoadConfiguration(t *testing.T) {
 			cfg: &Configuration{
 				Mode: Online,
 				Network: &types.NetworkIdentifier{
-					Network:    ethereum.TestnetNetwork,
+					Network:    ethereum.RopstenNetwork,
 					Blockchain: ethereum.Blockchain,
 				},
 				Params:                 params.RopstenChainConfig,
-				GenesisBlockIdentifier: ethereum.TestnetGenesisBlockIdentifier,
+				GenesisBlockIdentifier: ethereum.RopstenGenesisBlockIdentifier,
 				Port:                   1000,
 				GethURL:                DefaultGethURL,
-				GethArguments:          ethereum.TestnetGethArguments,
+				GethArguments:          ethereum.RopstenGethArguments,
 			},
 		},
 		"invalid mode": {
 			Mode:    "bad mode",
-			Network: Testnet,
+			Network: Ropsten,
 			Port:    "1000",
 			err:     errors.New("bad mode is not a valid mode"),
 		},
@@ -115,7 +132,7 @@ func TestLoadConfiguration(t *testing.T) {
 		},
 		"invalid port": {
 			Mode:    string(Offline),
-			Network: Testnet,
+			Network: Ropsten,
 			Port:    "bad port",
 			err:     errors.New("unable to parse port bad port"),
 		},

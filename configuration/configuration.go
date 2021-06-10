@@ -39,10 +39,13 @@ const (
 	// to make outbound connections.
 	Offline Mode = "OFFLINE"
 
-	// Mainnet is the Bitcoin Mainnet.
+	// Mainnet is the Ethereum Mainnet.
 	Mainnet string = "MAINNET"
 
-	// Testnet is Bitcoin Testnet3.
+	// Ropsten is the Ethereum Ropsten network.
+	Ropsten string = "ROPSTEN"
+
+	// Testnet defaults to `Ropsten` for backwards compatibility.
 	Testnet string = "TESTNET"
 
 	// DataDirectory is the default location for all
@@ -117,14 +120,14 @@ func LoadConfiguration() (*Configuration, error) {
 		config.GenesisBlockIdentifier = ethereum.MainnetGenesisBlockIdentifier
 		config.Params = params.MainnetChainConfig
 		config.GethArguments = ethereum.MainnetGethArguments
-	case Testnet:
+	case Testnet, Ropsten:
 		config.Network = &types.NetworkIdentifier{
 			Blockchain: ethereum.Blockchain,
-			Network:    ethereum.TestnetNetwork,
+			Network:    ethereum.RopstenNetwork,
 		}
-		config.GenesisBlockIdentifier = ethereum.TestnetGenesisBlockIdentifier
+		config.GenesisBlockIdentifier = ethereum.RopstenGenesisBlockIdentifier
 		config.Params = params.RopstenChainConfig
-		config.GethArguments = ethereum.TestnetGethArguments
+		config.GethArguments = ethereum.RopstenGethArguments
 	case "":
 		return nil, errors.New("NETWORK must be populated")
 	default:
