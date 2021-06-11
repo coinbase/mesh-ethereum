@@ -34,9 +34,17 @@ const (
 	// in MainnetNetworkIdentifier.
 	MainnetNetwork string = "Mainnet"
 
-	// TestnetNetwork is the value of the network
-	// in TestnetNetworkIdentifier.
-	TestnetNetwork string = "Ropsten"
+	// RopstenNetwork is the value of the network
+	// in RopstenNetworkIdentifier.
+	RopstenNetwork string = "Ropsten"
+
+	// RinkebyNetwork is the value of the network
+	// in RinkebyNetworkNetworkIdentifier.
+	RinkebyNetwork string = "RinkebyNetwork"
+
+	// GoerliNetwork is the value of the network
+	// in GoerliNetworkNetworkIdentifier.
+	GoerliNetwork string = "GoerliNetwork"
 
 	// Symbol is the symbol value
 	// used in Currency.
@@ -119,8 +127,14 @@ const (
 )
 
 var (
-	// TestnetGethArguments are the arguments to start a ropsten geth instance.
-	TestnetGethArguments = fmt.Sprintf("%s --ropsten", MainnetGethArguments)
+	// RopstenGethArguments are the arguments to start a ropsten geth instance.
+	RopstenGethArguments = fmt.Sprintf("%s --ropsten", MainnetGethArguments)
+
+	// RinkebyGethArguments are the arguments to start a rinkeby geth instance.
+	RinkebyGethArguments = fmt.Sprintf("%s --rinkeby", MainnetGethArguments)
+
+	// GoerliGethArguments are the arguments to start a ropsten geth instance.
+	GoerliGethArguments = fmt.Sprintf("%s --goerli", MainnetGethArguments)
 
 	// MainnetGenesisBlockIdentifier is the *types.BlockIdentifier
 	// of the mainnet genesis block.
@@ -129,10 +143,24 @@ var (
 		Index: GenesisBlockIndex,
 	}
 
-	// TestnetGenesisBlockIdentifier is the *types.BlockIdentifier
-	// of the testnet genesis block.
-	TestnetGenesisBlockIdentifier = &types.BlockIdentifier{
+	// RopstenGenesisBlockIdentifier is the *types.BlockIdentifier
+	// of the Ropsten genesis block.
+	RopstenGenesisBlockIdentifier = &types.BlockIdentifier{
 		Hash:  params.RopstenGenesisHash.Hex(),
+		Index: GenesisBlockIndex,
+	}
+
+	// RinkebyGenesisBlockIdentifier is the *types.BlockIdentifier
+	// of the Ropsten genesis block.
+	RinkebyGenesisBlockIdentifier = &types.BlockIdentifier{
+		Hash:  params.RinkebyGenesisHash.Hex(),
+		Index: GenesisBlockIndex,
+	}
+
+	// GoerliGenesisBlockIdentifier is the *types.BlockIdentifier
+	// of the Goerli genesis block.
+	GoerliGenesisBlockIdentifier = &types.BlockIdentifier{
+		Hash:  params.GoerliGenesisHash.Hex(),
 		Index: GenesisBlockIndex,
 	}
 
