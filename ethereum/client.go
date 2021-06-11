@@ -1071,7 +1071,7 @@ type graphqlBalance struct {
 	Data struct {
 		Block struct {
 			Hash    string `json:"hash"`
-			Number  string `json:"number"`
+			Number  int64  `json:"number"`
 			Account struct {
 				Balance string `json:"balance"`
 				Nonce   string `json:"transactionCount"`
@@ -1127,10 +1127,6 @@ func (ec *Client) Balance(
 		return nil, errors.New(RosettaTypes.PrintStruct(bal.Errors))
 	}
 
-	blockIndex, ok := new(big.Int).SetString(bal.Data.Block.Number[2:], 16)
-	if !ok {
-		return nil, fmt.Errorf("could not extract block index from %s", bal.Data.Block.Number)
-	}
 	balance, ok := new(big.Int).SetString(bal.Data.Block.Account.Balance[2:], 16)
 	if !ok {
 		return nil, fmt.Errorf(
@@ -1155,7 +1151,7 @@ func (ec *Client) Balance(
 		},
 		BlockIdentifier: &RosettaTypes.BlockIdentifier{
 			Hash:  bal.Data.Block.Hash,
-			Index: blockIndex.Int64(),
+			Index: bal.Data.Block.Number,
 		},
 		Metadata: map[string]interface{}{
 			"nonce": nonce.Int64(),
