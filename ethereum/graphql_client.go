@@ -35,8 +35,9 @@ const (
 // GraphQLClient is a client used to make graphQL
 // queries to geth's graphql endpoint.
 type GraphQLClient struct {
-	client *http.Client
-	url    string
+	client  *http.Client
+	url     string
+	headers []*HTTPHeader
 }
 
 // Query makes a query to the graphQL endpoint.
@@ -56,6 +57,10 @@ func (g *GraphQLClient) Query(ctx context.Context, input string) (string, error)
 		g.url,
 		bytes.NewBuffer(jsonValue),
 	)
+	for _, header := range g.headers {
+		request.Header.Set(header.Key, header.Value)
+	}
+
 	if err != nil {
 		return "", err
 	}
@@ -74,7 +79,7 @@ func (g *GraphQLClient) Query(ctx context.Context, input string) (string, error)
 	return string(data), nil
 }
 
-func newGraphQLClient(baseURL string) (*GraphQLClient, error) {
+func newGraphQLClient(baseURL string, headers []*HTTPHeader) (*GraphQLClient, error) {
 	// Compute GraphQL Endpoint
 	u, err := url.Parse(baseURL)
 	if err != nil {
@@ -97,7 +102,8 @@ func newGraphQLClient(baseURL string) (*GraphQLClient, error) {
 	client.Transport = customTransport
 
 	return &GraphQLClient{
-		client: client,
-		url:    u.String(),
+		client:  client,
+		url:     u.String(),
+		headers: headers,
 	}, nil
 }

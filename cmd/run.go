@@ -91,7 +91,7 @@ func runRunCmd(cmd *cobra.Command, args []string) error {
 		}
 
 		var err error
-		client, err = ethereum.NewClient(cfg.GethURL, cfg.Params, cfg.SkipGethAdmin)
+		client, err = ethereum.NewClient(cfg.GethURL, cfg.Params, cfg.SkipGethAdmin, cfg.GethHeaders)
 		if err != nil {
 			return fmt.Errorf("%w: cannot initialize ethereum client", err)
 		}

@@ -65,7 +65,7 @@ type Client struct {
 }
 
 // NewClient creates a Client that from the provided url and params.
-func NewClient(url string, params *params.ChainConfig, skipAdminCalls bool) (*Client, error) {
+func NewClient(url string, params *params.ChainConfig, skipAdminCalls bool, headers []*HTTPHeader) (*Client, error) {
 	c, err := rpc.DialHTTPWithClient(url, &http.Client{
 		Timeout: gethHTTPTimeout,
 	})
@@ -73,12 +73,16 @@ func NewClient(url string, params *params.ChainConfig, skipAdminCalls bool) (*Cl
 		return nil, fmt.Errorf("%w: unable to dial node", err)
 	}
 
+	for _, header := range headers {
+		c.SetHeader(header.Key, header.Value)
+	}
+
 	tc, err := loadTraceConfig()
 	if err != nil {
 		return nil, fmt.Errorf("%w: unable to load trace config", err)
 	}
 
-	g, err := newGraphQLClient(url)
+	g, err := newGraphQLClient(url, headers)
 	if err != nil {
 		return nil, fmt.Errorf("%w: unable to create GraphQL client", err)
 	}

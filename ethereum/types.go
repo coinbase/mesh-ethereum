@@ -216,6 +216,12 @@ type GraphQL interface {
 	Query(ctx context.Context, input string) (string, error)
 }
 
+// HTTP Header
+type HTTPHeader struct {
+	Key   string
+	Value string
+}
+
 // CallType returns a boolean indicating
 // if the provided trace type is a call type.
 func CallType(t string) bool {
