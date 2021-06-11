@@ -36,10 +36,10 @@ RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
 # Compile geth
 FROM golang-builder as geth-builder
 
-# VERSION: go-ethereum v.1.9.24
+# VERSION: go-ethereum v.1.10.3
 RUN git clone https://github.com/ethereum/go-ethereum \
   && cd go-ethereum \
-  && git checkout cc05b050df5f88e80bb26aaf6d2f339c49c2d702
+  && git checkout 991384a7f6719e1125ca0be7fb27d0c4d1c5d2d3
 
 RUN cd go-ethereum \
   && make geth
