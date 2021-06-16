@@ -40,11 +40,11 @@ const (
 
 	// RinkebyNetwork is the value of the network
 	// in RinkebyNetworkNetworkIdentifier.
-	RinkebyNetwork string = "RinkebyNetwork"
+	RinkebyNetwork string = "Rinkeby"
 
 	// GoerliNetwork is the value of the network
 	// in GoerliNetworkNetworkIdentifier.
-	GoerliNetwork string = "GoerliNetwork"
+	GoerliNetwork string = "Goerli"
 
 	// Symbol is the symbol value
 	// used in Currency.
