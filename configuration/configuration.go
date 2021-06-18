@@ -74,7 +74,7 @@ const (
 
 	// SkipGethAdminEnv is an optional environment variable
 	// to skip geth `admin` calls which are typically not supported
-	// by hosted node services.
+	// by hosted node services. When not set, defaults to false.
 	SkipGethAdminEnv = "SKIP_GETH_ADMIN"
 
 	// MiddlewareVersion is the version of rosetta-ethereum.
