@@ -192,6 +192,83 @@ func TestStatus_NotSyncing(t *testing.T) {
 	mockGraphQL.AssertExpectations(t)
 }
 
+func TestStatus_NotSyncing_SkipAdminCalls(t *testing.T) {
+	mockJSONRPC := &mocks.JSONRPC{}
+	mockGraphQL := &mocks.GraphQL{}
+
+	c := &Client{
+		c:              mockJSONRPC,
+		g:              mockGraphQL,
+		traceSemaphore: semaphore.NewWeighted(100),
+		skipAdminCalls: true,
+	}
+
+	ctx := context.Background()
+	mockJSONRPC.On(
+		"CallContext",
+		ctx,
+		mock.Anything,
+		"eth_getBlockByNumber",
+		"latest",
+		false,
+	).Return(
+		nil,
+	).Run(
+		func(args mock.Arguments) {
+			header := args.Get(1).(**types.Header)
+			file, err := ioutil.ReadFile("testdata/basic_header.json")
+			assert.NoError(t, err)
+
+			*header = new(types.Header)
+
+			assert.NoError(t, (*header).UnmarshalJSON(file))
+		},
+	).Once()
+
+	mockJSONRPC.On(
+		"CallContext",
+		ctx,
+		mock.Anything,
+		"eth_syncing",
+	).Return(
+		nil,
+	).Run(
+		func(args mock.Arguments) {
+			status := args.Get(1).(*json.RawMessage)
+
+			*status = json.RawMessage("false")
+		},
+	).Once()
+
+	adminPeersSkipped := true
+	mockJSONRPC.On(
+		"CallContext",
+		ctx,
+		mock.Anything,
+		"admin_peers",
+	).Return(
+		nil,
+	).Run(
+		func(args mock.Arguments) {
+			adminPeersSkipped = false
+		},
+	).Maybe()
+
+	block, timestamp, syncStatus, peers, err := c.Status(ctx)
+	assert.True(t, adminPeersSkipped)
+	assert.Equal(t, &RosettaTypes.BlockIdentifier{
+		Hash:  "0x48269a339ce1489cff6bab70eff432289c4f490b81dbd00ff1f81c68de06b842",
+		Index: 8916656,
+	}, block)
+	assert.Equal(t, int64(1603225195000), timestamp)
+	assert.Nil(t, syncStatus)
+	assert.Equal(t, []*RosettaTypes.Peer{}, peers)
+	assert.NoError(t, err)
+
+	mockJSONRPC.AssertExpectations(t)
+	mockGraphQL.AssertExpectations(t)
+}
+
 func TestStatus_Syncing(t *testing.T) {
 	mockJSONRPC := &mocks.JSONRPC{}
 	mockGraphQL := &mocks.GraphQL{}
@@ -311,6 +388,88 @@ func TestStatus_Syncing(t *testing.T) {
 			},
 		},
 	}, peers)
+	assert.NoError(t, err)
+
+	mockJSONRPC.AssertExpectations(t)
+	mockGraphQL.AssertExpectations(t)
+}
+
+func TestStatus_Syncing_SkipAdminCalls(t *testing.T) {
+	mockJSONRPC := &mocks.JSONRPC{}
+	mockGraphQL := &mocks.GraphQL{}
+
+	c := &Client{
+		c:              mockJSONRPC,
+		g:              mockGraphQL,
+		traceSemaphore: semaphore.NewWeighted(100),
+		skipAdminCalls: true,
+	}
+
+	ctx := context.Background()
+	mockJSONRPC.On(
+		"CallContext",
+		ctx,
+		mock.Anything,
+		"eth_getBlockByNumber",
+		"latest",
+		false,
+	).Return(
+		nil,
+	).Run(
+		func(args mock.Arguments) {
+			header := args.Get(1).(**types.Header)
+			file, err := ioutil.ReadFile("testdata/basic_header.json")
+			assert.NoError(t, err)
+
+			*header = new(types.Header)
+
+			assert.NoError(t, (*header).UnmarshalJSON(file))
+		},
+	).Once()
+
+	mockJSONRPC.On(
+		"CallContext",
+		ctx,
+		mock.Anything,
+		"eth_syncing",
+	).Return(
+		nil,
+	).Run(
+		func(args mock.Arguments) {
+			progress := args.Get(1).(*json.RawMessage)
+			file, err := ioutil.ReadFile("testdata/syncing_info.json")
+			assert.NoError(t, err)
+
+			*progress = json.RawMessage(file)
+		},
+	).Once()
+
+	adminPeersSkipped := true
+	mockJSONRPC.On(
+		"CallContext",
+		ctx,
+		mock.Anything,
+		"admin_peers",
+	).Return(
+		nil,
+	).Run(
+		func(args mock.Arguments) {
+			adminPeersSkipped = false
+		},
+	).Maybe()
+
+	block, timestamp, syncStatus, peers, err := c.Status(ctx)
+	assert.True(t, adminPeersSkipped)
+	assert.Equal(t, &RosettaTypes.BlockIdentifier{
+		Hash:  "0x48269a339ce1489cff6bab70eff432289c4f490b81dbd00ff1f81c68de06b842",
+		Index: 8916656,
+	}, block)
+	assert.Equal(t, int64(1603225195000), timestamp)
+	assert.Equal(t, &RosettaTypes.SyncStatus{
+		CurrentIndex: RosettaTypes.Int64(25),
+		TargetIndex:  RosettaTypes.Int64(8916760),
+	}, syncStatus)
+	assert.Equal(t, []*RosettaTypes.Peer{}, peers)
 	assert.NoError(t, err)
 
 	mockJSONRPC.AssertExpectations(t)
