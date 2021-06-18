@@ -65,7 +65,7 @@ func TestLoadConfiguration(t *testing.T) {
 				Port:                   1000,
 				GethURL:                DefaultGethURL,
 				GethArguments:          ethereum.MainnetGethArguments,
-				SkipGethAdminEnv:       false,
+				SkipGethAdmin:          false,
 			},
 		},
 		"all set (mainnet) + geth": {
@@ -86,7 +86,7 @@ func TestLoadConfiguration(t *testing.T) {
 				GethURL:                "http://blah",
 				RemoteGeth:             true,
 				GethArguments:          ethereum.MainnetGethArguments,
-				SkipGethAdminEnv:       true,
+				SkipGethAdmin:          true,
 			},
 		},
 		"all set (ropsten)": {
@@ -156,7 +156,7 @@ func TestLoadConfiguration(t *testing.T) {
 				Port:                   1000,
 				GethURL:                DefaultGethURL,
 				GethArguments:          ethereum.RopstenGethArguments,
-				SkipGethAdminEnv:       true,
+				SkipGethAdmin:          true,
 			},
 		},
 		"invalid mode": {

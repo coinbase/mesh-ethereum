@@ -99,7 +99,7 @@ type Configuration struct {
 	RemoteGeth             bool
 	Port                   int
 	GethArguments          string
-	SkipGethAdminEnv       bool
+	SkipGethAdmin          bool
 
 	// Block Reward Data
 	Params *params.ChainConfig
@@ -169,14 +169,14 @@ func LoadConfiguration() (*Configuration, error) {
 		config.GethURL = envGethURL
 	}
 
-	config.SkipGethAdminEnv = false
+	config.SkipGethAdmin = false
 	envSkipGethAdmin := os.Getenv(SkipGethAdminEnv)
 	if len(envSkipGethAdmin) > 0 {
 		val, err := strconv.ParseBool(envSkipGethAdmin)
 		if err != nil {
 			return nil, fmt.Errorf("%w: unable to parse SKIP_GETH_ADMIN %s", err, envSkipGethAdmin)
 		}
-		config.SkipGethAdminEnv = val
+		config.SkipGethAdmin = val
 	}
 
 	portValue := os.Getenv(PortEnv)
