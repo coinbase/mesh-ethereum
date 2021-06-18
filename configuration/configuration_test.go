@@ -134,7 +134,6 @@ func TestLoadConfiguration(t *testing.T) {
 			os.Setenv(NetworkEnv, test.Network)
 			os.Setenv(PortEnv, test.Port)
 			os.Setenv(GethEnv, test.Geth)
-			os.Setenv(GethEnv, test.Geth)
 			os.Setenv(SkipGethAdminEnv, strconv.FormatBool(test.SkipGethAdminEnv))
 
 			cfg, err := LoadConfiguration()
