@@ -29,11 +29,11 @@ import (
 
 func TestLoadConfiguration(t *testing.T) {
 	tests := map[string]struct {
-		Mode          string
-		Network       string
-		Port          string
-		Geth          string
-		SkipGethAdmin bool
+		Mode             string
+		Network          string
+		Port             string
+		Geth             string
+		SkipGethAdminEnv bool
 
 		cfg *Configuration
 		err error
@@ -65,15 +65,15 @@ func TestLoadConfiguration(t *testing.T) {
 				Port:                   1000,
 				GethURL:                DefaultGethURL,
 				GethArguments:          ethereum.MainnetGethArguments,
-				SkipGethAdmin:          false,
+				SkipGethAdminEnv:       false,
 			},
 		},
 		"all set (mainnet) + geth": {
-			Mode:          string(Online),
-			Network:       Mainnet,
-			Port:          "1000",
-			Geth:          "http://blah",
-			SkipGethAdmin: true,
+			Mode:             string(Online),
+			Network:          Mainnet,
+			Port:             "1000",
+			Geth:             "http://blah",
+			SkipGethAdminEnv: true,
 			cfg: &Configuration{
 				Mode: Online,
 				Network: &types.NetworkIdentifier{
@@ -86,14 +86,14 @@ func TestLoadConfiguration(t *testing.T) {
 				GethURL:                "http://blah",
 				RemoteGeth:             true,
 				GethArguments:          ethereum.MainnetGethArguments,
-				SkipGethAdmin:          true,
+				SkipGethAdminEnv:       true,
 			},
 		},
 		"all set (testnet)": {
-			Mode:          string(Online),
-			Network:       Testnet,
-			Port:          "1000",
-			SkipGethAdmin: true,
+			Mode:             string(Online),
+			Network:          Testnet,
+			Port:             "1000",
+			SkipGethAdminEnv: true,
 			cfg: &Configuration{
 				Mode: Online,
 				Network: &types.NetworkIdentifier{
@@ -105,7 +105,7 @@ func TestLoadConfiguration(t *testing.T) {
 				Port:                   1000,
 				GethURL:                DefaultGethURL,
 				GethArguments:          ethereum.TestnetGethArguments,
-				SkipGethAdmin:          true,
+				SkipGethAdminEnv:       true,
 			},
 		},
 		"invalid mode": {
@@ -135,7 +135,7 @@ func TestLoadConfiguration(t *testing.T) {
 			os.Setenv(PortEnv, test.Port)
 			os.Setenv(GethEnv, test.Geth)
 			os.Setenv(GethEnv, test.Geth)
-			os.Setenv(SkipGethAdmin, strconv.FormatBool(test.SkipGethAdmin))
+			os.Setenv(SkipGethAdminEnv, strconv.FormatBool(test.SkipGethAdminEnv))
 
 			cfg, err := LoadConfiguration()
 			if test.err != nil {
