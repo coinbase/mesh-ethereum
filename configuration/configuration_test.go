@@ -28,10 +28,11 @@ import (
 
 func TestLoadConfiguration(t *testing.T) {
 	tests := map[string]struct {
-		Mode    string
-		Network string
-		Port    string
-		Geth    string
+		Mode          string
+		Network       string
+		Port          string
+		Geth          string
+		SkipGethAdmin string
 
 		cfg *Configuration
 		err error
@@ -49,9 +50,10 @@ func TestLoadConfiguration(t *testing.T) {
 			err:     errors.New("PORT must be populated"),
 		},
 		"all set (mainnet)": {
-			Mode:    string(Online),
-			Network: Mainnet,
-			Port:    "1000",
+			Mode:          string(Online),
+			Network:       Mainnet,
+			Port:          "1000",
+			SkipGethAdmin: "FALSE",
 			cfg: &Configuration{
 				Mode: Online,
 				Network: &types.NetworkIdentifier{
@@ -63,13 +65,15 @@ func TestLoadConfiguration(t *testing.T) {
 				Port:                   1000,
 				GethURL:                DefaultGethURL,
 				GethArguments:          ethereum.MainnetGethArguments,
+				SkipGethAdmin:          false,
 			},
 		},
 		"all set (mainnet) + geth": {
-			Mode:    string(Online),
-			Network: Mainnet,
-			Port:    "1000",
-			Geth:    "http://blah",
+			Mode:          string(Online),
+			Network:       Mainnet,
+			Port:          "1000",
+			Geth:          "http://blah",
+			SkipGethAdmin: "TRUE",
 			cfg: &Configuration{
 				Mode: Online,
 				Network: &types.NetworkIdentifier{
@@ -82,6 +86,7 @@ func TestLoadConfiguration(t *testing.T) {
 				GethURL:                "http://blah",
 				RemoteGeth:             true,
 				GethArguments:          ethereum.MainnetGethArguments,
+				SkipGethAdmin:          true,
 			},
 		},
 		"all set (ropsten)": {
@@ -136,9 +141,10 @@ func TestLoadConfiguration(t *testing.T) {
 			},
 		},
 		"all set (testnet)": {
-			Mode:    string(Online),
-			Network: Testnet,
-			Port:    "1000",
+			Mode:          string(Online),
+			Network:       Testnet,
+			Port:          "1000",
+			SkipGethAdmin: "TRUE",
 			cfg: &Configuration{
 				Mode: Online,
 				Network: &types.NetworkIdentifier{
@@ -150,6 +156,7 @@ func TestLoadConfiguration(t *testing.T) {
 				Port:                   1000,
 				GethURL:                DefaultGethURL,
 				GethArguments:          ethereum.RopstenGethArguments,
+				SkipGethAdmin:          true,
 			},
 		},
 		"invalid mode": {
@@ -178,6 +185,7 @@ func TestLoadConfiguration(t *testing.T) {
 			os.Setenv(NetworkEnv, test.Network)
 			os.Setenv(PortEnv, test.Port)
 			os.Setenv(GethEnv, test.Geth)
+			os.Setenv(SkipGethAdminEnv, test.SkipGethAdmin)
 
 			cfg, err := LoadConfiguration()
 			if test.err != nil {

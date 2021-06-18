@@ -59,10 +59,12 @@ Running the following commands will start a Docker container in
 a data directory at `<working directory>/ethereum-data` and the Rosetta API accessible
 at port `8080`.
 
-The `NETWORK` environment variable can be set to `MAINNET`, `ROPSTEN`, `RINKEBY`, `GOERLI` or `TESTNET` (which defaults to `ROPSTEN`).
-
-_It is possible to run `rosetta-ethereum` using a remote node by adding
-`-e "GETH=<node url>"` to any online command._
+#### Configuration Environment Variables
+* `MODE` (required) - Determines if Rosetta can make outbound connections. Options: `ONLINE` or `OFFLINE`.
+* `NETWORK` (required) - Ethereum network to launch and/or communicate with. Options: `MAINNET`, `ROPSTEN`, `RINKEBY`, `GOERLI` or `TESTNET` (which defaults to `ROPSTEN` for backwards compatibility).
+* `PORT`(required) - Which port to use for Rosetta.
+* `GETH` (optional) - Point to a remote `geth` node instead of initializing one
+* `SKIP_GETH_ADMIN` (optional, default: `FALSE`) - Instruct Rosetta to not use the `geth` `admin` RPC calls. This is typically disabled by hosted blockchain node services.
 
 #### Mainnet:Online
 ```text
