@@ -216,7 +216,7 @@ type GraphQL interface {
 	Query(ctx context.Context, input string) (string, error)
 }
 
-// HTTP Header
+// HTTPHeader is key, value pair to be set on the HTTP and GraphQL client.
 type HTTPHeader struct {
 	Key   string
 	Value string
