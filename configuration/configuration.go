@@ -87,10 +87,10 @@ const (
 	// by hosted node services. When not set, defaults to false.
 	SkipGethAdminEnv = "SKIP_GETH_ADMIN"
 
-	// GethHeaders is an optional environment variable
+	// GethHeadersEnv is an optional environment variable
 	// of a comma-separated list of key:value pairs to apply
 	// to geth clients as headers. When not set, defaults to []
-	GethHeaders = "GETH_HEADERS"
+	GethHeadersEnv = "GETH_HEADERS"
 
 	// MiddlewareVersion is the version of rosetta-ethereum.
 	MiddlewareVersion = "0.0.4"
@@ -186,7 +186,7 @@ func LoadConfiguration() (*Configuration, error) {
 		config.SkipGethAdmin = val
 	}
 
-	envGethHeaders := os.Getenv(GethHeaders)
+	envGethHeaders := os.Getenv(GethHeadersEnv)
 	if len(envGethHeaders) > 0 {
 		headers := strings.Split(envGethHeaders, ",")
 		headerKVs := make([]*ethereum.HTTPHeader, len(headers))
