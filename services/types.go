@@ -129,7 +129,7 @@ type transaction struct {
 	From     string   `json:"from"`
 	To       string   `json:"to"`
 	Value    *big.Int `json:"value"`
-	Input    []byte   `json:"input"`
+	Data     []byte   `json:"data"`
 	Nonce    uint64   `json:"nonce"`
 	GasPrice *big.Int `json:"gas_price"`
 	GasLimit uint64   `json:"gas"`
@@ -140,7 +140,7 @@ type transactionWire struct {
 	From     string `json:"from"`
 	To       string `json:"to"`
 	Value    string `json:"value"`
-	Input    string `json:"input"`
+	Data     string `json:"data"`
 	Nonce    string `json:"nonce"`
 	GasPrice string `json:"gas_price"`
 	GasLimit string `json:"gas"`
@@ -152,7 +152,7 @@ func (t *transaction) MarshalJSON() ([]byte, error) {
 		From:     t.From,
 		To:       t.To,
 		Value:    hexutil.EncodeBig(t.Value),
-		Input:    hexutil.Encode(t.Input),
+		Data:     hexutil.Encode(t.Data),
 		Nonce:    hexutil.EncodeUint64(t.Nonce),
 		GasPrice: hexutil.EncodeBig(t.GasPrice),
 		GasLimit: hexutil.EncodeUint64(t.GasLimit),
@@ -173,7 +173,7 @@ func (t *transaction) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	input, err := hexutil.Decode(tw.Input)
+	data_, err := hexutil.Decode(tw.Data)
 	if err != nil {
 		return err
 	}
@@ -201,7 +201,7 @@ func (t *transaction) UnmarshalJSON(data []byte) error {
 	t.From = tw.From
 	t.To = tw.To
 	t.Value = value
-	t.Input = input
+	t.Data = data_
 	t.Nonce = nonce
 	t.GasPrice = gasPrice
 	t.GasLimit = gasLimit
