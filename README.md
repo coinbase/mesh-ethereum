@@ -65,6 +65,7 @@ at port `8080`.
 * `PORT`(required) - Which port to use for Rosetta.
 * `GETH` (optional) - Point to a remote `geth` node instead of initializing one
 * `SKIP_GETH_ADMIN` (optional, default: `FALSE`) - Instruct Rosetta to not use the `geth` `admin` RPC calls. This is typically disabled by hosted blockchain node services.
+* `GETH_HEADERS` (optional) - Pass a key:value comma-separated list to be passed to the `geth` clients. e.g. `X-Auth-Token:12345-ABCDE,X-Other-Header:SomeOtherValue`
 
 #### Mainnet:Online
 ```text
