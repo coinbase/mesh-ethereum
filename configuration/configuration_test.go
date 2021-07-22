@@ -33,6 +33,7 @@ func TestLoadConfiguration(t *testing.T) {
 		Port          string
 		Geth          string
 		SkipGethAdmin string
+		GethHeaders   string
 
 		cfg *Configuration
 		err error
@@ -54,6 +55,7 @@ func TestLoadConfiguration(t *testing.T) {
 			Network:       Mainnet,
 			Port:          "1000",
 			SkipGethAdmin: "FALSE",
+			GethHeaders:   "",
 			cfg: &Configuration{
 				Mode: Online,
 				Network: &types.NetworkIdentifier{
@@ -66,6 +68,7 @@ func TestLoadConfiguration(t *testing.T) {
 				GethURL:                DefaultGethURL,
 				GethArguments:          ethereum.MainnetGethArguments,
 				SkipGethAdmin:          false,
+				GethHeaders:            nil,
 			},
 		},
 		"all set (mainnet) + geth": {
@@ -74,6 +77,7 @@ func TestLoadConfiguration(t *testing.T) {
 			Port:          "1000",
 			Geth:          "http://blah",
 			SkipGethAdmin: "TRUE",
+			GethHeaders:   "X-Auth-Token:12345-ABCDE,X-Api-Version:2",
 			cfg: &Configuration{
 				Mode: Online,
 				Network: &types.NetworkIdentifier{
@@ -87,6 +91,10 @@ func TestLoadConfiguration(t *testing.T) {
 				RemoteGeth:             true,
 				GethArguments:          ethereum.MainnetGethArguments,
 				SkipGethAdmin:          true,
+				GethHeaders: []*ethereum.HTTPHeader{
+					{Key: "X-Auth-Token", Value: "12345-ABCDE"},
+					{Key: "X-Api-Version", Value: "2"},
+				},
 			},
 		},
 		"all set (ropsten)": {
@@ -104,6 +112,7 @@ func TestLoadConfiguration(t *testing.T) {
 				Port:                   1000,
 				GethURL:                DefaultGethURL,
 				GethArguments:          ethereum.RopstenGethArguments,
+				GethHeaders:            nil,
 			},
 		},
 		"all set (rinkeby)": {
@@ -121,6 +130,7 @@ func TestLoadConfiguration(t *testing.T) {
 				Port:                   1000,
 				GethURL:                DefaultGethURL,
 				GethArguments:          ethereum.RinkebyGethArguments,
+				GethHeaders:            nil,
 			},
 		},
 		"all set (goerli)": {
@@ -138,6 +148,7 @@ func TestLoadConfiguration(t *testing.T) {
 				Port:                   1000,
 				GethURL:                DefaultGethURL,
 				GethArguments:          ethereum.GoerliGethArguments,
+				GethHeaders:            nil,
 			},
 		},
 		"all set (testnet)": {
@@ -145,6 +156,7 @@ func TestLoadConfiguration(t *testing.T) {
 			Network:       Testnet,
 			Port:          "1000",
 			SkipGethAdmin: "TRUE",
+			GethHeaders:   "X-Auth-Token:12345-ABCDE,X-Api-Version:2",
 			cfg: &Configuration{
 				Mode: Online,
 				Network: &types.NetworkIdentifier{
@@ -157,6 +169,10 @@ func TestLoadConfiguration(t *testing.T) {
 				GethURL:                DefaultGethURL,
 				GethArguments:          ethereum.RopstenGethArguments,
 				SkipGethAdmin:          true,
+				GethHeaders: []*ethereum.HTTPHeader{
+					{Key: "X-Auth-Token", Value: "12345-ABCDE"},
+					{Key: "X-Api-Version", Value: "2"},
+				},
 			},
 		},
 		"invalid mode": {
@@ -186,6 +202,7 @@ func TestLoadConfiguration(t *testing.T) {
 			os.Setenv(PortEnv, test.Port)
 			os.Setenv(GethEnv, test.Geth)
 			os.Setenv(SkipGethAdminEnv, test.SkipGethAdmin)
+			os.Setenv(GethHeadersEnv, test.GethHeaders)
 
 			cfg, err := LoadConfiguration()
 			if test.err != nil {

@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/coinbase/rosetta-ethereum/ethereum"
 
@@ -86,6 +87,11 @@ const (
 	// by hosted node services. When not set, defaults to false.
 	SkipGethAdminEnv = "SKIP_GETH_ADMIN"
 
+	// GethHeadersEnv is an optional environment variable
+	// of a comma-separated list of key:value pairs to apply
+	// to geth clients as headers. When not set, defaults to []
+	GethHeadersEnv = "GETH_HEADERS"
+
 	// MiddlewareVersion is the version of rosetta-ethereum.
 	MiddlewareVersion = "0.0.4"
 )
@@ -100,6 +106,7 @@ type Configuration struct {
 	Port                   int
 	GethArguments          string
 	SkipGethAdmin          bool
+	GethHeaders            []*ethereum.HTTPHeader
 
 	// Block Reward Data
 	Params *params.ChainConfig
@@ -177,6 +184,20 @@ func LoadConfiguration() (*Configuration, error) {
 			return nil, fmt.Errorf("%w: unable to parse SKIP_GETH_ADMIN %s", err, envSkipGethAdmin)
 		}
 		config.SkipGethAdmin = val
+	}
+
+	envGethHeaders := os.Getenv(GethHeadersEnv)
+	if len(envGethHeaders) > 0 {
+		headers := strings.Split(envGethHeaders, ",")
+		headerKVs := make([]*ethereum.HTTPHeader, len(headers))
+		for i, pair := range headers {
+			kv := strings.Split(pair, ":")
+			headerKVs[i] = &ethereum.HTTPHeader{
+				Key:   kv[0],
+				Value: kv[1],
+			}
+		}
+		config.GethHeaders = headerKVs
 	}
 
 	portValue := os.Getenv(PortEnv)
