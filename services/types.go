@@ -173,7 +173,7 @@ func (t *transaction) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	data_, err := hexutil.Decode(tw.Data)
+	twData, err := hexutil.Decode(tw.Data)
 	if err != nil {
 		return err
 	}
@@ -201,7 +201,7 @@ func (t *transaction) UnmarshalJSON(data []byte) error {
 	t.From = tw.From
 	t.To = tw.To
 	t.Value = value
-	t.Data = data_
+	t.Data = twData
 	t.Nonce = nonce
 	t.GasPrice = gasPrice
 	t.GasLimit = gasLimit
