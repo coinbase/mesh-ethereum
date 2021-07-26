@@ -265,7 +265,7 @@ func (s *ConstructionAPIService) ConstructionPayloads(
 		From:     checkFrom,
 		To:       checkTo,
 		Value:    amount,
-		Input:    tx.Data(),
+		Data:     tx.Data(),
 		Nonce:    tx.Nonce(),
 		GasPrice: gasPrice,
 		GasLimit: tx.Gas(),
@@ -308,7 +308,7 @@ func (s *ConstructionAPIService) ConstructionCombine(
 		unsignedTx.Value,
 		unsignedTx.GasLimit,
 		unsignedTx.GasPrice,
-		unsignedTx.Input,
+		unsignedTx.Data,
 	)
 
 	signer := ethTypes.NewEIP155Signer(unsignedTx.ChainID)
@@ -366,7 +366,7 @@ func (s *ConstructionAPIService) ConstructionParse(
 
 		tx.To = t.To().String()
 		tx.Value = t.Value()
-		tx.Input = t.Data()
+		tx.Data = t.Data()
 		tx.Nonce = t.Nonce()
 		tx.GasPrice = t.GasPrice()
 		tx.GasLimit = t.Gas()
