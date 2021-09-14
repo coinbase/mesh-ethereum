@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Compile golang 
+# Compile golang
 FROM ubuntu:18.04 as golang-builder
 
 RUN mkdir -p /app \
@@ -36,10 +36,10 @@ RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
 # Compile geth
 FROM golang-builder as geth-builder
 
-# VERSION: go-ethereum v.1.10.3
+# VERSION: go-ethereum v.1.10.8
 RUN git clone https://github.com/ethereum/go-ethereum \
   && cd go-ethereum \
-  && git checkout 991384a7f6719e1125ca0be7fb27d0c4d1c5d2d3
+  && git checkout 26675454bf93bf904be7a43cce6b3f550115ff90
 
 RUN cd go-ethereum \
   && make geth
@@ -51,7 +51,7 @@ RUN mv go-ethereum/build/bin/geth /app/geth \
 FROM golang-builder as rosetta-builder
 
 # Use native remote build context to build in any directory
-COPY . src 
+COPY . src
 RUN cd src \
   && go build
 
@@ -59,7 +59,7 @@ RUN mv src/rosetta-ethereum /app/rosetta-ethereum \
   && mkdir /app/ethereum \
   && mv src/ethereum/call_tracer.js /app/ethereum/call_tracer.js \
   && mv src/ethereum/geth.toml /app/ethereum/geth.toml \
-  && rm -rf src 
+  && rm -rf src
 
 ## Build Final Image
 FROM ubuntu:18.04
