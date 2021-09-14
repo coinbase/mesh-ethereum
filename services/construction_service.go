@@ -372,7 +372,7 @@ func (s *ConstructionAPIService) ConstructionParse(
 		tx.GasLimit = t.Gas()
 		tx.ChainID = t.ChainId()
 
-		msg, err := t.AsMessage(ethTypes.NewEIP155Signer(t.ChainId()))
+		msg, err := t.AsMessage(ethTypes.NewEIP155Signer(t.ChainId()), nil)
 		if err != nil {
 			return nil, wrapErr(ErrUnableToParseIntermediateResult, err)
 		}
