@@ -9,7 +9,7 @@ ADDLICENCE_SCRIPT=${ADDLICENSE_CMD} -c "Coinbase, Inc." -l "apache" -v
 SPELLCHECK_CMD=go run github.com/client9/misspell/cmd/misspell
 GOLINES_INSTALL=go install github.com/segmentio/golines@latest
 GOLINES_CMD=golines
-GOLINT_INSTALL=go install golang.org/x/lint/golint
+GOLINT_INSTALL=go get golang.org/x/lint/golint
 GOLINT_CMD=golint
 GOVERALLS_INSTALL=go install github.com/mattn/goveralls@latest
 GOVERALLS_CMD=goveralls
@@ -66,6 +66,7 @@ run-testnet-remote:
 check-comments:
 	${GOLINT_INSTALL}
 	${GOLINT_CMD} -set_exit_status ${GO_FOLDERS} .
+	go mod tidy
 
 lint: | check-comments
 	golangci-lint run --timeout 2m0s -v -E ${LINT_SETTINGS},gomnd
