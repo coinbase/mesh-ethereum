@@ -64,6 +64,7 @@ run-testnet-remote:
 	docker run -d --rm --ulimit "nofile=${NOFILE}:${NOFILE}" -e "MODE=ONLINE" -e "NETWORK=TESTNET" -e "PORT=8080" -e "GETH=$(geth)" -p 8080:8080 -p 30303:30303 rosetta-ethereum:latest
 
 check-comments:
+	${GOLINT_INSTALL}
 	${GOLINT_CMD} -set_exit_status ${GO_FOLDERS} .
 
 lint: | check-comments
