@@ -200,6 +200,7 @@ var (
 
 	// CallMethods are all supported call methods.
 	CallMethods = []string{
+		"eth_getBlockByNumber",
 		"eth_getTransactionReceipt",
 	}
 )

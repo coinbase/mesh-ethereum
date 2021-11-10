@@ -768,7 +768,93 @@ func TestBalance_InvalidHash(t *testing.T) {
 	mockGraphQL.AssertExpectations(t)
 }
 
-func TestCall(t *testing.T) {
+func TestCall_GetBlockByNumber(t *testing.T) {
+	mockJSONRPC := &mocks.JSONRPC{}
+	mockGraphQL := &mocks.GraphQL{}
+
+	c := &Client{
+		c:              mockJSONRPC,
+		g:              mockGraphQL,
+		traceSemaphore: semaphore.NewWeighted(100),
+	}
+
+	ctx := context.Background()
+
+	mockJSONRPC.On(
+		"CallContext",
+		ctx,
+		mock.Anything,
+		"eth_getBlockByNumber",
+		"0x2af0",
+		false,
+	).Return(
+		nil,
+	).Run(
+		func(args mock.Arguments) {
+			r := args.Get(1).(*map[string]interface{})
+
+			file, err := ioutil.ReadFile("testdata/block_10992.json")
+			assert.NoError(t, err)
+
+			err = json.Unmarshal(file, r)
+			assert.NoError(t, err)
+		},
+	).Once()
+
+	correctRaw, err := ioutil.ReadFile("testdata/block_10992.json")
+	assert.NoError(t, err)
+	var correct map[string]interface{}
+	assert.NoError(t, json.Unmarshal(correctRaw, &correct))
+
+	resp, err := c.Call(
+		ctx,
+		&RosettaTypes.CallRequest{
+			Method: "eth_getBlockByNumber",
+			Parameters: map[string]interface{}{
+				"index":                    RosettaTypes.Int64(10992),
+				"show_transaction_details": false,
+			},
+		},
+	)
+	assert.Equal(t, &RosettaTypes.CallResponse{
+		Result:     correct,
+		Idempotent: false,
+	}, resp)
+	assert.NoError(t, err)
+
+	mockJSONRPC.AssertExpectations(t)
+	mockGraphQL.AssertExpectations(t)
+}
+
+func TestCall_GetBlockByNumber_InvalidArgs(t *testing.T) {
+	mockJSONRPC := &mocks.JSONRPC{}
+	mockGraphQL := &mocks.GraphQL{}
+
+	c := &Client{
+		c:              mockJSONRPC,
+		g:              mockGraphQL,
+		traceSemaphore: semaphore.NewWeighted(100),
+	}
+
+	ctx := context.Background()
+	resp, err := c.Call(
+		ctx,
+		&RosettaTypes.CallRequest{
+			Method: "eth_getBlockByNumber",
+			Parameters: map[string]interface{}{
+				"index":                    "a string",
+				"show_transaction_details": false,
+			},
+		},
+	)
+	assert.Nil(t, resp)
+	assert.True(t, errors.Is(err, ErrCallParametersInvalid))
+
+	mockJSONRPC.AssertExpectations(t)
+	mockGraphQL.AssertExpectations(t)
+}
+
+func TestCall_GetTransactionReceipt(t *testing.T) {
 	mockJSONRPC := &mocks.JSONRPC{}
 	mockGraphQL := &mocks.GraphQL{}
 
@@ -833,7 +919,7 @@ func TestCall(t *testing.T) {
 	mockGraphQL.AssertExpectations(t)
 }
 
-func TestCall_InvalidArgs(t *testing.T) {
+func TestCall_GetTransactionReceipt_InvalidArgs(t *testing.T) {
 	mockJSONRPC := &mocks.JSONRPC{}
 	mockGraphQL := &mocks.GraphQL{}
 

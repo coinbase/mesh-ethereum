@@ -818,6 +818,29 @@ func (ec *Client) transactionReceipt(
 	return r, err
 }
 
+func (ec *Client) blockByNumber(
+	ctx context.Context,
+	index *int64,
+	showTxDetails bool,
+) (map[string]interface{}, error) {
+	var blockIndex string
+	if index == nil {
+		blockIndex = toBlockNumArg(nil)
+	} else {
+		blockIndex = toBlockNumArg(big.NewInt(*index))
+	}
+
+	r := make(map[string]interface{})
+	err := ec.c.CallContext(ctx, &r, "eth_getBlockByNumber", blockIndex, showTxDetails)
+	if err == nil {
+		if r == nil {
+			return nil, ethereum.NotFound
+		}
+	}
+
+	return r, err
+}
+
 func (ec *Client) getParsedBlock(
 	ctx context.Context,
 	blockMethod string,
@@ -1167,6 +1190,13 @@ func (ec *Client) Balance(
 	}, nil
 }
 
+// GetBlockByNumberInput is the input to the call
+// method "eth_getBlockByNumber".
+type GetBlockByNumberInput struct {
+	Index         *int64 `json:"index,omitempty"`
+	ShowTxDetails bool   `json:"show_transaction_details"`
+}
+
 // GetTransactionReceiptInput is the input to the call
 // method "eth_getTransactionReceipt".
 type GetTransactionReceiptInput struct {
@@ -1179,6 +1209,20 @@ func (ec *Client) Call(
 	request *RosettaTypes.CallRequest,
 ) (*RosettaTypes.CallResponse, error) {
 	switch request.Method { // nolint:gocritic
+	case "eth_getBlockByNumber":
+		var input GetBlockByNumberInput
+		if err := RosettaTypes.UnmarshalMap(request.Parameters, &input); err != nil {
+			return nil, fmt.Errorf("%w: %s", ErrCallParametersInvalid, err.Error())
+		}
+
+		res, err := ec.blockByNumber(ctx, input.Index, input.ShowTxDetails)
+		if err != nil {
+			return nil, err
+		}
+
+		return &RosettaTypes.CallResponse{
+			Result: res,
+		}, nil
 	case "eth_getTransactionReceipt":
 		var input GetTransactionReceiptInput
 		if err := RosettaTypes.UnmarshalMap(request.Parameters, &input); err != nil {
