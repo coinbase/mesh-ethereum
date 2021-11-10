@@ -826,6 +826,34 @@ func TestCall_GetBlockByNumber(t *testing.T) {
 	mockGraphQL.AssertExpectations(t)
 }
 
+func TestCall_GetBlockByNumber_InvalidArgs(t *testing.T) {
+	mockJSONRPC := &mocks.JSONRPC{}
+	mockGraphQL := &mocks.GraphQL{}
+
+	c := &Client{
+		c:              mockJSONRPC,
+		g:              mockGraphQL,
+		traceSemaphore: semaphore.NewWeighted(100),
+	}
+
+	ctx := context.Background()
+	resp, err := c.Call(
+		ctx,
+		&RosettaTypes.CallRequest{
+			Method: "eth_getBlockByNumber",
+			Parameters: map[string]interface{}{
+				"index":                    "a string",
+				"show_transaction_details": false,
+			},
+		},
+	)
+	assert.Nil(t, resp)
+	assert.True(t, errors.Is(err, ErrCallParametersInvalid))
+
+	mockJSONRPC.AssertExpectations(t)
+	mockGraphQL.AssertExpectations(t)
+}
+
 func TestCall_GetTransactionReceipt(t *testing.T) {
 	mockJSONRPC := &mocks.JSONRPC{}
 	mockGraphQL := &mocks.GraphQL{}
