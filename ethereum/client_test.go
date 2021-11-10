@@ -775,7 +775,6 @@ func TestCall_GetBlockByNumber(t *testing.T) {
 	c := &Client{
 		c:              mockJSONRPC,
 		g:              mockGraphQL,
-		p:              params.RopstenChainConfig,
 		traceSemaphore: semaphore.NewWeighted(100),
 	}
 
