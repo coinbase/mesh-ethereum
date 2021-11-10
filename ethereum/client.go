@@ -1171,6 +1171,13 @@ func (ec *Client) Balance(
 	}, nil
 }
 
+// GetBlockByNumberInput is the input to the call
+// method "eth_getBlockByNumber".
+type GetBlockByNumberInput struct {
+	Index         *int64 `json:"index,omitempty"`
+	ShowTxDetails bool   `json:"show_transaction_details"`
+}
+
 // GetTransactionReceiptInput is the input to the call
 // method "eth_getTransactionReceipt".
 type GetTransactionReceiptInput struct {
@@ -1183,6 +1190,27 @@ func (ec *Client) Call(
 	request *RosettaTypes.CallRequest,
 ) (*RosettaTypes.CallResponse, error) {
 	switch request.Method { // nolint:gocritic
+	case "eth_getBlockByNumber":
+		var input GetBlockByNumberInput
+		if err := RosettaTypes.UnmarshalMap(request.Parameters, &input); err != nil {
+			return nil, fmt.Errorf("%w: %s", ErrCallParametersInvalid, err.Error())
+		}
+
+		var blockIndex string
+		if input.Index == nil {
+			blockIndex = toBlockNumArg(nil)
+		} else {
+			blockIndex = toBlockNumArg(big.NewInt(*input.Index))
+		}
+
+		res := make(map[string]interface{})
+		if err := ec.c.CallContext(ctx, &res, "eth_getBlockByNumber", blockIndex, input.ShowTxDetails); err != nil {
+			return nil, fmt.Errorf("%w: could not get block", err)
+		}
+
+		return &RosettaTypes.CallResponse{
+			Result: res,
+		}, nil
 	case "eth_getTransactionReceipt":
 		var input GetTransactionReceiptInput
 		if err := RosettaTypes.UnmarshalMap(request.Parameters, &input); err != nil {
