@@ -822,6 +822,29 @@ func (ec *Client) transactionReceipt(
 	return r, err
 }
 
+func (ec *Client) blockByNumber(
+	ctx context.Context,
+	index *int64,
+	showTxDetails bool,
+) (map[string]interface{}, error) {
+	var blockIndex string
+	if index == nil {
+		blockIndex = toBlockNumArg(nil)
+	} else {
+		blockIndex = toBlockNumArg(big.NewInt(*index))
+	}
+
+	r := make(map[string]interface{})
+	err := ec.c.CallContext(ctx, &r, "eth_getBlockByNumber", blockIndex, showTxDetails)
+	if err == nil {
+		if r == nil {
+			return nil, ethereum.NotFound
+		}
+	}
+
+	return r, err
+}
+
 func (ec *Client) getParsedBlock(
 	ctx context.Context,
 	blockMethod string,
@@ -1196,16 +1219,9 @@ func (ec *Client) Call(
 			return nil, fmt.Errorf("%w: %s", ErrCallParametersInvalid, err.Error())
 		}
 
-		var blockIndex string
-		if input.Index == nil {
-			blockIndex = toBlockNumArg(nil)
-		} else {
-			blockIndex = toBlockNumArg(big.NewInt(*input.Index))
-		}
-
-		res := make(map[string]interface{})
-		if err := ec.c.CallContext(ctx, &res, "eth_getBlockByNumber", blockIndex, input.ShowTxDetails); err != nil {
-			return nil, fmt.Errorf("%w: could not get block", err)
+		res, err := ec.blockByNumber(ctx, input.Index, input.ShowTxDetails)
+		if err != nil {
+			return nil, err
 		}
 
 		return &RosettaTypes.CallResponse{
