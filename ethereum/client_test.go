@@ -891,7 +891,7 @@ func TestCall_GetTransactionReceipt(t *testing.T) {
 	mockGraphQL.AssertExpectations(t)
 }
 
-func TestCall_InvalidArgs(t *testing.T) {
+func TestCall_GetTransactionReceipt_InvalidArgs(t *testing.T) {
 	mockJSONRPC := &mocks.JSONRPC{}
 	mockGraphQL := &mocks.GraphQL{}
 
