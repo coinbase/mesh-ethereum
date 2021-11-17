@@ -841,6 +841,42 @@ func (ec *Client) blockByNumber(
 	return r, err
 }
 
+// contractCall returns the data specified by the given contract method
+func (ec *Client) contractCall(ctx context.Context,
+	blockIndex int64, blockHash string, contractAddress string,
+	encodedData string) (map[string]interface{}, error) {
+	// default query
+	blockQuery := "latest"
+	// if block number, convert to block number argument
+	if blockIndex > int64(0) {
+		blockQuery = toBlockNumArg(big.NewInt(blockIndex))
+		// if not block number, check for block hash
+	} else if len(blockHash) > 0 {
+		blockQuery = blockHash
+	}
+
+	// ensure valid contract address
+	_, ok := ChecksumAddress(contractAddress)
+	if !ok {
+		return nil, ErrCallParametersInvalid
+	}
+
+	// parameters for eth_call
+	params := map[string]string {
+		"to": contractAddress,
+		"data": encodedData,
+	}
+
+	var resp string
+	if err := ec.c.CallContext(ctx, &resp, "eth_call", params, blockQuery); err != nil {
+		return nil, err
+	}
+
+	return map[string]interface{}{
+		"data": resp,
+	}, nil
+}
+
 func (ec *Client) getParsedBlock(
 	ctx context.Context,
 	blockMethod string,
@@ -1203,6 +1239,16 @@ type GetTransactionReceiptInput struct {
 	TxHash string `json:"tx_hash"`
 }
 
+// GetCallInput is the input to the call
+// method "eth_call".
+type GetCallInput struct {
+	BlockIndex int64 `json:"index,omitempty"`
+	BlockHash string `json:"hash,omitempty"`
+	ContractAddress string `json:"contract_address"`
+	Data string `json:"data"`
+}
+
+
 // Call handles calls to the /call endpoint.
 func (ec *Client) Call(
 	ctx context.Context,
@@ -1253,6 +1299,24 @@ func (ec *Client) Call(
 		// We must encode data over the wire so we can unmarshal correctly
 		return &RosettaTypes.CallResponse{
 			Result: receiptMap,
+		}, nil
+	case "eth_call":
+		var input GetCallInput
+		if err := RosettaTypes.UnmarshalMap(request.Parameters, &input); err != nil {
+			return nil, fmt.Errorf("%w: %s", ErrCallParametersInvalid, err.Error())
+		}
+
+		if len(input.ContractAddress) == 0 || len(input.Data) == 0 {
+			return nil, fmt.Errorf("%w:contract_address or data missing from params", ErrCallParametersInvalid)
+		}
+
+		resp, err := ec.contractCall(ctx, input.BlockIndex, input.BlockHash, input.ContractAddress, input.Data)
+		if err != nil {
+			return nil, err
+		}
+
+		return &RosettaTypes.CallResponse{
+			Result: resp,
 		}, nil
 	}
 
