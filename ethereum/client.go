@@ -847,10 +847,11 @@ func (ec *Client) contractCall(ctx context.Context,
 	encodedData string) (map[string]interface{}, error) {
 	// default query
 	blockQuery := "latest"
+
 	// if block number, convert to block number argument
 	if blockIndex > int64(0) {
 		blockQuery = toBlockNumArg(big.NewInt(blockIndex))
-		// if not block number, check for block hash
+	// if not block number, check for block hash
 	} else if len(blockHash) > 0 {
 		blockQuery = blockHash
 	}
