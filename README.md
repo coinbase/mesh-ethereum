@@ -135,7 +135,7 @@ and run one of the following commands:
 ## Future Work
 * Add ERC-20 Rosetta Module to enable reading ERC-20 token transfers and transaction construction
 * [Rosetta API `/mempool/*`](https://www.rosetta-api.org/docs/MempoolApi.html) implementation
-* Add more methods to the `/call` endpoint (currently only supports `eth_getBlockByNumber` and `eth_getTransactionReceipt`)
+* Add more methods to the `/call` endpoint (currently only supports `eth_getBlockByNumber`,  `eth_call`, and `eth_getTransactionReceipt`)
 * Add CI test using `rosetta-cli` to run on each PR (likely on a regtest network)
 
 _Please reach out on our [community](https://community.rosetta-api.org) if you want to tackle anything on this list!_
