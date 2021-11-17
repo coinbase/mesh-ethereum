@@ -1026,7 +1026,7 @@ func TestCall_Call_InvalidArgs(t *testing.T) {
 			Parameters: map[string]interface{}{
 				"index": 11408349,
 				"Hash": "0x73fc065bc04f16c98247f8ec1e990f581ec58723bcd8059de85f93ab18706448",
-				"contract_address": "not valid",
+				"contract_address": "not valid  ",
 				"data": "0x70a08231000000000000000000000000b5e5d0f8c0cba267cd3d7035d6adc8eba7df7cdd",
 			},
 		},
