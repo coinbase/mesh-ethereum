@@ -843,15 +843,17 @@ func (ec *Client) blockByNumber(
 
 // contractCall returns the data specified by the given contract method
 func (ec *Client) contractCall(ctx context.Context,
-	blockIndex int64, blockHash string, contractAddress string,
-	encodedData string) (map[string]interface{}, error) {
+	blockIndex int64,
+	blockHash string,
+	contractAddress string,
+	encodedData string,
+) (map[string]interface{}, error) {
 	// default query
 	blockQuery := "latest"
 
-	// if block number, convert to block number argument
+	// if block number or hash, override blockQuery
 	if blockIndex > int64(0) {
 		blockQuery = toBlockNumArg(big.NewInt(blockIndex))
-	// if not block number, check for block hash
 	} else if len(blockHash) > 0 {
 		blockQuery = blockHash
 	}
@@ -863,8 +865,8 @@ func (ec *Client) contractCall(ctx context.Context,
 	}
 
 	// parameters for eth_call
-	params := map[string]string {
-		"to": contractAddress,
+	params := map[string]string{
+		"to":   contractAddress,
 		"data": encodedData,
 	}
 
@@ -1243,12 +1245,11 @@ type GetTransactionReceiptInput struct {
 // GetCallInput is the input to the call
 // method "eth_call".
 type GetCallInput struct {
-	BlockIndex int64 `json:"index,omitempty"`
-	BlockHash string `json:"hash,omitempty"`
+	BlockIndex      int64  `json:"index,omitempty"`
+	BlockHash       string `json:"hash,omitempty"`
 	ContractAddress string `json:"contract_address"`
-	Data string `json:"data"`
+	Data            string `json:"data"`
 }
-
 
 // Call handles calls to the /call endpoint.
 func (ec *Client) Call(
