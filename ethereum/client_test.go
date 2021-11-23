@@ -960,8 +960,8 @@ func TestCall_Call(t *testing.T) {
 		ctx,
 		mock.Anything,
 		"eth_call",
-		map[string]string {
-			"to": "0xB5E5D0F8C0cbA267CD3D7035d6AdC8eBA7Df7Cdd",
+		map[string]string{
+			"to":   "0xB5E5D0F8C0cbA267CD3D7035d6AdC8eBA7Df7Cdd",
 			"data": "0x70a08231000000000000000000000000b5e5d0f8c0cba267cd3d7035d6adc8eba7df7cdd",
 		},
 		toBlockNumArg(big.NewInt(11408349)),
@@ -992,9 +992,9 @@ func TestCall_Call(t *testing.T) {
 		&RosettaTypes.CallRequest{
 			Method: "eth_call",
 			Parameters: map[string]interface{}{
-				"index": 11408349,
+				"index":            11408349,
 				"contract_address": "0xB5E5D0F8C0cbA267CD3D7035d6AdC8eBA7Df7Cdd",
-				"data": "0x70a08231000000000000000000000000b5e5d0f8c0cba267cd3d7035d6adc8eba7df7cdd",
+				"data":             "0x70a08231000000000000000000000000b5e5d0f8c0cba267cd3d7035d6adc8eba7df7cdd",
 			},
 		},
 	)
@@ -1024,10 +1024,10 @@ func TestCall_Call_InvalidArgs(t *testing.T) {
 		&RosettaTypes.CallRequest{
 			Method: "eth_call",
 			Parameters: map[string]interface{}{
-				"index": 11408349,
-				"Hash": "0x73fc065bc04f16c98247f8ec1e990f581ec58723bcd8059de85f93ab18706448",
+				"index":            11408349,
+				"Hash":             "0x73fc065bc04f16c98247f8ec1e990f581ec58723bcd8059de85f93ab18706448",
 				"contract_address": "not valid  ",
-				"data": "0x70a08231000000000000000000000000b5e5d0f8c0cba267cd3d7035d6adc8eba7df7cdd",
+				"data":             "0x70a08231000000000000000000000000b5e5d0f8c0cba267cd3d7035d6adc8eba7df7cdd",
 			},
 		},
 	)
