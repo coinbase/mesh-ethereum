@@ -848,6 +848,10 @@ func (ec *Client) contractCall(ctx context.Context,
 	contractAddress string,
 	encodedData string,
 ) (map[string]interface{}, error) {
+	if len(contractAddress) == 0 || len(encodedData) == 0 {
+		return nil, fmt.Errorf("%w:to address or data missing from params", ErrCallParametersInvalid)
+	}
+
 	// default query
 	blockQuery := "latest"
 
@@ -886,6 +890,10 @@ func (ec *Client) estimateGas(ctx context.Context,
 	contractAddress string,
 	encodedData string,
 ) (map[string]interface{}, error) {
+	if len(contractAddress) == 0 || len(encodedData) == 0 {
+		return nil, fmt.Errorf("%w:to address or data missing from params", ErrCallParametersInvalid)
+	}
+
 	// ensure valid contract address
 	_, ok := ChecksumAddress(contractAddress)
 	if !ok {
@@ -1346,11 +1354,6 @@ func (ec *Client) Call(
 		if err := RosettaTypes.UnmarshalMap(request.Parameters, &input); err != nil {
 			return nil, fmt.Errorf("%w: %s", ErrCallParametersInvalid, err.Error())
 		}
-
-		if len(input.To) == 0 || len(input.Data) == 0 {
-			return nil, fmt.Errorf("%w:to address or data missing from params", ErrCallParametersInvalid)
-		}
-
 		resp, err := ec.contractCall(ctx, input.BlockIndex, input.BlockHash, input.To, input.Data)
 		if err != nil {
 			return nil, err
@@ -1364,11 +1367,6 @@ func (ec *Client) Call(
 		if err := RosettaTypes.UnmarshalMap(request.Parameters, &input); err != nil {
 			return nil, fmt.Errorf("%w: %s", ErrCallParametersInvalid, err.Error())
 		}
-
-		if len(input.To) == 0 || len(input.Data) == 0 {
-			return nil, fmt.Errorf("%w:to address or data missing from params", ErrCallParametersInvalid)
-		}
-
 		resp, err := ec.estimateGas(ctx, input.From, input.To, input.Data)
 		if err != nil {
 			return nil, err
