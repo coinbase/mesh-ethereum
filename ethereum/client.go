@@ -936,7 +936,7 @@ func validateCallInput(params map[string]interface{}) (*GetCallInput, error) {
 	}
 
 	if len(input.Data) == 0 {
-		return nil, fmt.Errorf("%w:data is missing from paramaters", ErrCallParametersInvalid)
+		return nil, fmt.Errorf("%w:data is missing from parameters", ErrCallParametersInvalid)
 	}
 	return &input, nil
 }
