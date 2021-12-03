@@ -16,19 +16,40 @@
 
 <p align="center"><b>
 ROSETTA-ETHEREUM IS CONSIDERED <a href="https://en.wikipedia.org/wiki/Software_release_life_cycle#Alpha">ALPHA SOFTWARE</a>.
-USE AT YOUR OWN RISK! COINBASE ASSUMES NO RESPONSIBILITY NOR LIABILITY IF THERE IS A BUG IN THIS IMPLEMENTATION.
+USE AT YOUR OWN RISK! COINBASE ASSUMES NO RESPONSIBILITY OR LIABILITY IF THERE IS A BUG IN THIS IMPLEMENTATION.
 </b></p>
 
 ## Overview
-`rosetta-ethereum` provides a reference implementation of the Rosetta API for
-Ethereum in Golang. If you haven't heard of the Rosetta API, you can find more
-information [here](https://rosetta-api.org).
+`rosetta-ethereum` provides a reference implementation of the Rosetta API for Ethereum in Golang. If you haven't heard of the Rosetta API, you can find more information [here](https://rosetta-api.org).
 
 ## Features
 * Comprehensive tracking of all ETH balance changes
 * Stateless, offline, curve-based transaction construction (with address checksum validation)
 * Atomic balance lookups using go-ethereum's GraphQL Endpoint
 * Idempotent access to all transaction traces and receipts
+
+## System Requirements
+`rosetta-ethereum` has been tested on an [AWS c5.2xlarge instance](https://aws.amazon.com/ec2/instance-types/c5).
+This instance type has 8 vCPU and 16 GB of RAM. If you use a computer with less than 16 GB of RAM,
+it is possible that `rosetta-ethereum` will exit with an OOM error.
+
+### Recommended OS Settings
+To increase the load `rosetta-ethereum` can handle, it is recommended to tune your OS
+settings to allow for more connections. On a linux-based OS, you can run the following
+commands ([source](http://www.tweaked.io/guide/kernel)):
+```text
+sysctl -w net.ipv4.tcp_tw_reuse=1
+sysctl -w net.core.rmem_max=16777216
+sysctl -w net.core.wmem_max=16777216
+sysctl -w net.ipv4.tcp_max_syn_backlog=10000
+sysctl -w net.core.somaxconn=10000
+sysctl -p (when done)
+```
+_We have not tested `rosetta-ethereum` with `net.ipv4.tcp_tw_recycle` and do not recommend
+enabling it._
+
+You should also modify your open file settings to `100000`. This can be done on a linux-based OS
+with the command: `ulimit -n 100000`.
 
 ## Usage
 As specified in the [Rosetta API Principles](https://www.rosetta-api.org/docs/automated_deployment.html),
@@ -46,6 +67,9 @@ To download the pre-built Docker image from the latest release, run:
 ```text
 curl -sSfL https://raw.githubusercontent.com/coinbase/rosetta-ethereum/master/install.sh | sh -s
 ```
+
+_Do not try to install rosetta-ethereum using GitHub Packages!_
+
 
 #### From Source
 After cloning this repository, run:
@@ -102,43 +126,15 @@ docker run -d --rm -e "MODE=OFFLINE" -e "NETWORK=TESTNET" -e "PORT=8081" -p 8081
 ```
 _If you cloned the repository, you can run `make run-testnet-offline`._
 
-## System Requirements
-`rosetta-ethereum` has been tested on an [AWS c5.2xlarge instance](https://aws.amazon.com/ec2/instance-types/c5).
-This instance type has 8 vCPU and 16 GB of RAM. If you use a computer with less than 16 GB of RAM,
-it is possible that `rosetta-ethereum` will exit with an OOM error.
-
-### Recommended OS Settings
-To increase the load `rosetta-ethereum` can handle, it is recommended to tune your OS
-settings to allow for more connections. On a linux-based OS, you can run the following
-commands ([source](http://www.tweaked.io/guide/kernel)):
-```text
-sysctl -w net.ipv4.tcp_tw_reuse=1
-sysctl -w net.core.rmem_max=16777216
-sysctl -w net.core.wmem_max=16777216
-sysctl -w net.ipv4.tcp_max_syn_backlog=10000
-sysctl -w net.core.somaxconn=10000
-sysctl -p (when done)
-```
-_We have not tested `rosetta-ethereum` with `net.ipv4.tcp_tw_recycle` and do not recommend
-enabling it._
-
-You should also modify your open file settings to `100000`. This can be done on a linux-based OS
-with the command: `ulimit -n 100000`.
-
 ## Testing with rosetta-cli
 To validate `rosetta-ethereum`, [install `rosetta-cli`](https://github.com/coinbase/rosetta-cli#install)
 and run one of the following commands:
-* `rosetta-cli check:data --configuration-file rosetta-cli-conf/testnet/config.json`
-* `rosetta-cli check:construction --configuration-file rosetta-cli-conf/testnet/config.json`
-* `rosetta-cli check:data --configuration-file rosetta-cli-conf/mainnet/config.json`
+* `rosetta-cli check:data --configuration-file rosetta-cli-conf/testnet/config.json` - This command validates that the Data API implementation is correct using the ethereum `testnet` node. It also ensures that the implementation does not miss any balance-changing operations.
+* `rosetta-cli check:construction --configuration-file rosetta-cli-conf/testnet/config.json` - This command validates the Construction API implementation. It also verifies transaction construction, signing, and submissions to the `testnet` network.
+* `rosetta-cli check:data --configuration-file rosetta-cli-conf/mainnet/config.json` - This command validates that the Data API implementation is correct using the ethereum `mainnet` node. It also ensures that the implementation does not miss any balance-changing operations.
 
-## Future Work
-* Add ERC-20 Rosetta Module to enable reading ERC-20 token transfers and transaction construction
-* [Rosetta API `/mempool/*`](https://www.rosetta-api.org/docs/MempoolApi.html) implementation
-* Add more methods to the `/call` endpoint (currently only supports `eth_getBlockByNumber`,  `eth_call`, `eth_estimateGas`, and `eth_getTransactionReceipt`)
-* Add CI test using `rosetta-cli` to run on each PR (likely on a regtest network)
-
-_Please reach out on our [community](https://community.rosetta-api.org) if you want to tackle anything on this list!_
+## Issues
+Interested in helping fix issues in this repository? You can find to-dos in the [Issues](https://github.com/coinbase/rosetta-ethereum/issues) section. Be sure to reach out on our [community](https://community.rosetta-api.org) before you tackle anything on this list.
 
 ## Development
 * `make deps` to install dependencies
