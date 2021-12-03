@@ -943,6 +943,196 @@ func TestCall_GetTransactionReceipt_InvalidArgs(t *testing.T) {
 	mockGraphQL.AssertExpectations(t)
 }
 
+func TestCall_Call(t *testing.T) {
+	mockJSONRPC := &mocks.JSONRPC{}
+	mockGraphQL := &mocks.GraphQL{}
+
+	c := &Client{
+		c:              mockJSONRPC,
+		g:              mockGraphQL,
+		traceSemaphore: semaphore.NewWeighted(100),
+	}
+
+	ctx := context.Background()
+
+	mockJSONRPC.On(
+		"CallContext",
+		ctx,
+		mock.Anything,
+		"eth_call",
+		map[string]string{
+			"to":   "0xB5E5D0F8C0cbA267CD3D7035d6AdC8eBA7Df7Cdd",
+			"data": "0x70a08231000000000000000000000000b5e5d0f8c0cba267cd3d7035d6adc8eba7df7cdd",
+		},
+		toBlockNumArg(big.NewInt(11408349)),
+	).Return(
+		nil,
+	).Run(
+		func(args mock.Arguments) {
+			r := args.Get(1).(*string)
+
+			var expected map[string]interface{}
+			file, err := ioutil.ReadFile("testdata/call_balance_11408349.json")
+			assert.NoError(t, err)
+
+			err = json.Unmarshal(file, &expected)
+			assert.NoError(t, err)
+
+			*r = expected["data"].(string)
+		},
+	).Once()
+
+	correctRaw, err := ioutil.ReadFile("testdata/call_balance_11408349.json")
+	assert.NoError(t, err)
+	var correct map[string]interface{}
+	assert.NoError(t, json.Unmarshal(correctRaw, &correct))
+
+	resp, err := c.Call(
+		ctx,
+		&RosettaTypes.CallRequest{
+			Method: "eth_call",
+			Parameters: map[string]interface{}{
+				"index": 11408349,
+				"to":    "0xB5E5D0F8C0cbA267CD3D7035d6AdC8eBA7Df7Cdd",
+				"data":  "0x70a08231000000000000000000000000b5e5d0f8c0cba267cd3d7035d6adc8eba7df7cdd",
+			},
+		},
+	)
+	assert.Equal(t, &RosettaTypes.CallResponse{
+		Result:     correct,
+		Idempotent: false,
+	}, resp)
+	assert.NoError(t, err)
+
+	mockJSONRPC.AssertExpectations(t)
+	mockGraphQL.AssertExpectations(t)
+}
+
+func TestCall_Call_InvalidArgs(t *testing.T) {
+	mockJSONRPC := &mocks.JSONRPC{}
+	mockGraphQL := &mocks.GraphQL{}
+
+	c := &Client{
+		c:              mockJSONRPC,
+		g:              mockGraphQL,
+		traceSemaphore: semaphore.NewWeighted(100),
+	}
+
+	ctx := context.Background()
+	resp, err := c.Call(
+		ctx,
+		&RosettaTypes.CallRequest{
+			Method: "eth_call",
+			Parameters: map[string]interface{}{
+				"index": 11408349,
+				"Hash":  "0x73fc065bc04f16c98247f8ec1e990f581ec58723bcd8059de85f93ab18706448",
+				"to":    "not valid  ",
+				"data":  "0x70a08231000000000000000000000000b5e5d0f8c0cba267cd3d7035d6adc8eba7df7cdd",
+			},
+		},
+	)
+	assert.Nil(t, resp)
+	assert.True(t, errors.Is(err, ErrCallParametersInvalid))
+
+	mockJSONRPC.AssertExpectations(t)
+	mockGraphQL.AssertExpectations(t)
+}
+
+func TestCall_EstimateGas(t *testing.T) {
+	mockJSONRPC := &mocks.JSONRPC{}
+	mockGraphQL := &mocks.GraphQL{}
+
+	c := &Client{
+		c:              mockJSONRPC,
+		g:              mockGraphQL,
+		traceSemaphore: semaphore.NewWeighted(100),
+	}
+
+	ctx := context.Background()
+
+	mockJSONRPC.On(
+		"CallContext",
+		ctx,
+		mock.Anything,
+		"eth_estimateGas",
+		map[string]string{
+			"from": "0xE550f300E477C60CE7e7172d12e5a27e9379D2e3",
+			"to":   "0xaD6D458402F60fD3Bd25163575031ACDce07538D",
+			"data": "0xa9059cbb000000000000000000000000ae7e48ee0f758cd706b76cf7e2175d982800879a" +
+				"00000000000000000000000000000000000000000000000000521c5f98b8ea00",
+		},
+	).Return(
+		nil,
+	).Run(
+		func(args mock.Arguments) {
+			r := args.Get(1).(*string)
+
+			var expected map[string]interface{}
+			file, err := ioutil.ReadFile("testdata/estimate_gas_0xaD6D458402F60fD3Bd25163575031ACDce07538D.json")
+			assert.NoError(t, err)
+
+			err = json.Unmarshal(file, &expected)
+			assert.NoError(t, err)
+
+			*r = expected["data"].(string)
+		},
+	).Once()
+
+	correctRaw, err := ioutil.ReadFile("testdata/estimate_gas_0xaD6D458402F60fD3Bd25163575031ACDce07538D.json")
+	assert.NoError(t, err)
+	var correct map[string]interface{}
+	assert.NoError(t, json.Unmarshal(correctRaw, &correct))
+
+	resp, err := c.Call(
+		ctx,
+		&RosettaTypes.CallRequest{
+			Method: "eth_estimateGas",
+			Parameters: map[string]interface{}{
+				"from": "0xE550f300E477C60CE7e7172d12e5a27e9379D2e3",
+				"to":   "0xaD6D458402F60fD3Bd25163575031ACDce07538D",
+				"data": "0xa9059cbb000000000000000000000000ae7e48ee0f758cd706b76cf7e2175d982800879a" +
+					"00000000000000000000000000000000000000000000000000521c5f98b8ea00",
+			},
+		},
+	)
+	assert.Equal(t, &RosettaTypes.CallResponse{
+		Result:     correct,
+		Idempotent: false,
+	}, resp)
+	assert.NoError(t, err)
+
+	mockJSONRPC.AssertExpectations(t)
+	mockGraphQL.AssertExpectations(t)
+}
+
+func TestCall_EstimateGas_InvalidArgs(t *testing.T) {
+	mockJSONRPC := &mocks.JSONRPC{}
+	mockGraphQL := &mocks.GraphQL{}
+
+	c := &Client{
+		c:              mockJSONRPC,
+		g:              mockGraphQL,
+		traceSemaphore: semaphore.NewWeighted(100),
+	}
+
+	ctx := context.Background()
+	resp, err := c.Call(
+		ctx,
+		&RosettaTypes.CallRequest{
+			Method: "eth_estimateGas",
+			Parameters: map[string]interface{}{
+				"From": "0xE550f300E477C60CE7e7172d12e5a27e9379D2e3",
+				"to":   "0xaD6D458402F60fD3Bd25163575031ACDce07538D",
+			},
+		},
+	)
+	assert.Nil(t, resp)
+	assert.True(t, errors.Is(err, ErrCallParametersInvalid))
+
+	mockJSONRPC.AssertExpectations(t)
+	mockGraphQL.AssertExpectations(t)
+}
+
 func TestCall_InvalidMethod(t *testing.T) {
 	mockJSONRPC := &mocks.JSONRPC{}
 	mockGraphQL := &mocks.GraphQL{}

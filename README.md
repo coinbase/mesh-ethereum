@@ -126,8 +126,6 @@ docker run -d --rm -e "MODE=OFFLINE" -e "NETWORK=TESTNET" -e "PORT=8081" -p 8081
 ```
 _If you cloned the repository, you can run `make run-testnet-offline`._
 
-
-
 ## Testing with rosetta-cli
 To validate `rosetta-ethereum`, [install `rosetta-cli`](https://github.com/coinbase/rosetta-cli#install)
 and run one of the following commands:
@@ -136,7 +134,7 @@ and run one of the following commands:
 * `rosetta-cli check:data --configuration-file rosetta-cli-conf/mainnet/config.json` - This command validates that the Data API implementation is correct using the ethereum `mainnet` node. It also ensures that the implementation does not miss any balance-changing operations.
 
 ## Issues
-Interested in helping fix issues in this repository? You can find to-dos in the [Issues](https://github.com/coinbase/rosetta-ethereum/issues) section with the `help wanted` tag. Be sure to reach out on our [community](https://community.rosetta-api.org) before you tackle anything on this list.
+Interested in helping fix issues in this repository? You can find to-dos in the [Issues](https://github.com/coinbase/rosetta-ethereum/issues) section. Be sure to reach out on our [community](https://community.rosetta-api.org) before you tackle anything on this list.
 
 ## Development
 * `make deps` to install dependencies

@@ -841,6 +841,106 @@ func (ec *Client) blockByNumber(
 	return r, err
 }
 
+// contractCall returns the data specified by the given contract method
+func (ec *Client) contractCall(
+	ctx context.Context,
+	params map[string]interface{},
+) (map[string]interface{}, error) {
+	// validate call input
+	input, err := validateCallInput(params)
+	if err != nil {
+		return nil, err
+	}
+
+	// default query
+	blockQuery := "latest"
+
+	// if block number or hash, override blockQuery
+	if input.BlockIndex > int64(0) {
+		blockQuery = toBlockNumArg(big.NewInt(input.BlockIndex))
+	} else if len(input.BlockHash) > 0 {
+		blockQuery = input.BlockHash
+	}
+
+	// ensure valid contract address
+	_, ok := ChecksumAddress(input.To)
+	if !ok {
+		return nil, ErrCallParametersInvalid
+	}
+
+	// parameters for eth_call
+	callParams := map[string]string{
+		"to":   input.To,
+		"data": input.Data,
+	}
+
+	var resp string
+	if err := ec.c.CallContext(ctx, &resp, "eth_call", callParams, blockQuery); err != nil {
+		return nil, err
+	}
+
+	return map[string]interface{}{
+		"data": resp,
+	}, nil
+}
+
+// estimateGas returns the data specified by the given contract method
+func (ec *Client) estimateGas(
+	ctx context.Context,
+	params map[string]interface{},
+) (map[string]interface{}, error) {
+	// validate call input
+	input, err := validateCallInput(params)
+	if err != nil {
+		return nil, err
+	}
+
+	// ensure valid contract address
+	_, ok := ChecksumAddress(input.To)
+	if !ok {
+		return nil, ErrCallParametersInvalid
+	}
+
+	// ensure valid from address
+	_, ok = ChecksumAddress(input.From)
+	if !ok {
+		return nil, ErrCallParametersInvalid
+	}
+
+	// parameters for eth_estimateGas
+	estimateGasParams := map[string]string{
+		"from": input.From,
+		"to":   input.To,
+		"data": input.Data,
+	}
+
+	var resp string
+	if err := ec.c.CallContext(ctx, &resp, "eth_estimateGas", estimateGasParams); err != nil {
+		return nil, err
+	}
+
+	return map[string]interface{}{
+		"data": resp,
+	}, nil
+}
+
+func validateCallInput(params map[string]interface{}) (*GetCallInput, error) {
+	var input GetCallInput
+	if err := RosettaTypes.UnmarshalMap(params, &input); err != nil {
+		return nil, fmt.Errorf("%w: %s", ErrCallParametersInvalid, err.Error())
+	}
+
+	// to address is required for call requests
+	if len(input.To) == 0 {
+		return nil, fmt.Errorf("%w:to address is missing from parameters", ErrCallParametersInvalid)
+	}
+
+	if len(input.Data) == 0 {
+		return nil, fmt.Errorf("%w:data is missing from parameters", ErrCallParametersInvalid)
+	}
+	return &input, nil
+}
+
 func (ec *Client) getParsedBlock(
 	ctx context.Context,
 	blockMethod string,
@@ -1203,6 +1303,19 @@ type GetTransactionReceiptInput struct {
 	TxHash string `json:"tx_hash"`
 }
 
+// GetCallInput is the input to the call
+// method "eth_call", "eth_estimateGas".
+type GetCallInput struct {
+	BlockIndex int64  `json:"index,omitempty"`
+	BlockHash  string `json:"hash,omitempty"`
+	From       string `json:"from"`
+	To         string `json:"to"`
+	Gas        int64  `json:"gas"`
+	GasPrice   int64  `json:"gas_price"`
+	Value      int64  `json:"value"`
+	Data       string `json:"data"`
+}
+
 // Call handles calls to the /call endpoint.
 func (ec *Client) Call(
 	ctx context.Context,
@@ -1253,6 +1366,24 @@ func (ec *Client) Call(
 		// We must encode data over the wire so we can unmarshal correctly
 		return &RosettaTypes.CallResponse{
 			Result: receiptMap,
+		}, nil
+	case "eth_call":
+		resp, err := ec.contractCall(ctx, request.Parameters)
+		if err != nil {
+			return nil, err
+		}
+
+		return &RosettaTypes.CallResponse{
+			Result: resp,
+		}, nil
+	case "eth_estimateGas":
+		resp, err := ec.estimateGas(ctx, request.Parameters)
+		if err != nil {
+			return nil, err
+		}
+
+		return &RosettaTypes.CallResponse{
+			Result: resp,
 		}, nil
 	}
 

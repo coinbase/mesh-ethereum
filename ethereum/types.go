@@ -202,6 +202,8 @@ var (
 	CallMethods = []string{
 		"eth_getBlockByNumber",
 		"eth_getTransactionReceipt",
+		"eth_call",
+		"eth_estimateGas",
 	}
 )
 
