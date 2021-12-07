@@ -13,7 +13,7 @@
 # limitations under the License.
 
 # Compile golang
-FROM ubuntu:18.04 as golang-builder
+FROM ubuntu:20.04 as golang-builder
 
 RUN mkdir -p /app \
   && chown -R nobody:nogroup /app
@@ -62,7 +62,7 @@ RUN mv src/rosetta-ethereum /app/rosetta-ethereum \
   && rm -rf src
 
 ## Build Final Image
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 
 RUN apt-get update && apt-get install -y ca-certificates && update-ca-certificates
 
