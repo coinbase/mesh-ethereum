@@ -39,7 +39,7 @@ build-release:
 	docker save rosetta-ethereum:$(version) | gzip > rosetta-ethereum-$(version).tar.gz;
 
 update-tracer:
-	curl https://raw.githubusercontent.com/ethereum/go-ethereum/master/eth/tracers/internal/tracers/call_tracer.js -o ethereum/client/call_tracer.js
+	curl https://raw.githubusercontent.com/ethereum/go-ethereum/master/eth/tracers/js/internal/tracers/call_tracer_js.js -o ethereum/call_tracer.js
 
 update-bootstrap-balances:
 	go run main.go utils:generate-bootstrap ethereum/genesis_files/mainnet.json rosetta-cli-conf/mainnet/bootstrap_balances.json;
