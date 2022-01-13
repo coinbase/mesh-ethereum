@@ -33,7 +33,6 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	EthTypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/eth/tracers"
-	"github.com/ethereum/go-ethereum/p2p"
 	"github.com/ethereum/go-ethereum/params"
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/ethereum/go-ethereum/rpc"
@@ -100,30 +99,25 @@ func (ec *Client) Status(ctx context.Context) (
 	[]*RosettaTypes.Peer,
 	error,
 ) {
+	// TODO: figure out if header corresponds to replica or sequencer
 	header, err := ec.blockHeader(ctx, nil)
 	if err != nil {
 		return nil, -1, nil, nil, err
 	}
 
-	progress, err := ec.syncProgress(ctx)
-	if err != nil {
-		return nil, -1, nil, nil, err
-	}
+	// TODO: Redo sync status with comparison to sequencer here
+	// progress, err := ec.syncProgress(ctx)
+	// if err != nil {
+	// 	return nil, -1, nil, nil, err
+	// }
 
 	var syncStatus *RosettaTypes.SyncStatus
-	if progress != nil {
-		currentIndex := int64(progress.CurrentBlock)
-		targetIndex := int64(progress.HighestBlock)
+	currentIndex := int64(header.Number.Uint64())
+	targetIndex := int64(header.Number.Uint64()) // TODO: fetch this from sequencer instead
 
-		syncStatus = &RosettaTypes.SyncStatus{
-			CurrentIndex: &currentIndex,
-			TargetIndex:  &targetIndex,
-		}
-	}
-
-	peers, err := ec.peers(ctx)
-	if err != nil {
-		return nil, -1, nil, nil, err
+	syncStatus = &RosettaTypes.SyncStatus{
+		CurrentIndex: &currentIndex,
+		TargetIndex:  &targetIndex,
 	}
 
 	return &RosettaTypes.BlockIdentifier{
@@ -132,7 +126,7 @@ func (ec *Client) Status(ctx context.Context) (
 		},
 		convertTime(header.Time),
 		syncStatus,
-		peers,
+		nil, // Replicas currently do not have peers
 		nil
 }
 
@@ -152,35 +146,6 @@ func (ec *Client) SuggestGasPrice(ctx context.Context) (*big.Int, error) {
 		return nil, err
 	}
 	return (*big.Int)(&hex), nil
-}
-
-// Peers retrieves all peers of the node.
-func (ec *Client) peers(ctx context.Context) ([]*RosettaTypes.Peer, error) {
-	var info []*p2p.PeerInfo
-
-	if ec.skipAdminCalls {
-		return []*RosettaTypes.Peer{}, nil
-	}
-
-	if err := ec.c.CallContext(ctx, &info, "admin_peers"); err != nil {
-		return nil, err
-	}
-
-	peers := make([]*RosettaTypes.Peer, len(info))
-	for i, peerInfo := range info {
-		peers[i] = &RosettaTypes.Peer{
-			PeerID: peerInfo.ID,
-			Metadata: map[string]interface{}{
-				"name":      peerInfo.Name,
-				"enode":     peerInfo.Enode,
-				"caps":      peerInfo.Caps,
-				"enr":       peerInfo.ENR,
-				"protocols": peerInfo.Protocols,
-			},
-		}
-	}
-
-	return peers, nil
 }
 
 // SendTransaction injects a signed transaction into the pending pool for execution.
@@ -249,64 +214,6 @@ type rpcBlock struct {
 	UncleHashes  []common.Hash    `json:"uncles"`
 }
 
-func (ec *Client) getUncles(
-	ctx context.Context,
-	head *types.Header,
-	body *rpcBlock,
-) ([]*types.Header, error) {
-	// Quick-verify transaction and uncle lists. This mostly helps with debugging the server.
-	if head.UncleHash == types.EmptyUncleHash && len(body.UncleHashes) > 0 {
-		return nil, fmt.Errorf(
-			"server returned non-empty uncle list but block header indicates no uncles",
-		)
-	}
-	if head.UncleHash != types.EmptyUncleHash && len(body.UncleHashes) == 0 {
-		return nil, fmt.Errorf(
-			"server returned empty uncle list but block header indicates uncles",
-		)
-	}
-	if head.TxHash == types.EmptyRootHash && len(body.Transactions) > 0 {
-		return nil, fmt.Errorf(
-			"server returned non-empty transaction list but block header indicates no transactions",
-		)
-	}
-	if head.TxHash != types.EmptyRootHash && len(body.Transactions) == 0 {
-		return nil, fmt.Errorf(
-			"server returned empty transaction list but block header indicates transactions",
-		)
-	}
-	// Load uncles because they are not included in the block response.
-	var uncles []*types.Header
-	if len(body.UncleHashes) > 0 {
-		uncles = make([]*types.Header, len(body.UncleHashes))
-		reqs := make([]rpc.BatchElem, len(body.UncleHashes))
-		for i := range reqs {
-			reqs[i] = rpc.BatchElem{
-				Method: "eth_getUncleByBlockHashAndIndex",
-				Args:   []interface{}{body.Hash, hexutil.EncodeUint64(uint64(i))},
-				Result: &uncles[i],
-			}
-		}
-		if err := ec.c.BatchCallContext(ctx, reqs); err != nil {
-			return nil, err
-		}
-		for i := range reqs {
-			if reqs[i].Error != nil {
-				return nil, reqs[i].Error
-			}
-			if uncles[i] == nil {
-				return nil, fmt.Errorf(
-					"got null header for uncle %d of block %x",
-					i,
-					body.Hash[:],
-				)
-			}
-		}
-	}
-
-	return uncles, nil
-}
-
 func (ec *Client) getBlock(
 	ctx context.Context,
 	blockMethod string,
@@ -334,11 +241,6 @@ func (ec *Client) getBlock(
 		return nil, nil, err
 	}
 
-	uncles, err := ec.getUncles(ctx, &head, &body)
-	if err != nil {
-		return nil, nil, fmt.Errorf("%w: unable to get uncles", err)
-	}
-
 	// Get all transaction receipts
 	receipts, err := ec.getBlockReceipts(ctx, body.Hash, body.Transactions)
 	if err != nil {
@@ -353,13 +255,14 @@ func (ec *Client) getBlock(
 	var traces []*rpcCall
 	var rawTraces []*rpcRawCall
 	var addTraces bool
-	if head.Number.Int64() != GenesisBlockIndex { // not possible to get traces at genesis
-		addTraces = true
-		traces, rawTraces, err = ec.getBlockTraces(ctx, body.Hash)
-		if err != nil {
-			return nil, nil, fmt.Errorf("%w: could not get traces for %x", err, body.Hash[:])
-		}
-	}
+	// TODO: optimism currently doesn't support block traces
+	// if head.Number.Int64() != GenesisBlockIndex { // not possible to get traces at genesis
+	// 	addTraces = true
+	// 	traces, rawTraces, err = ec.getBlockTraces(ctx, body.Hash)
+	// 	if err != nil {
+	// 		return nil, nil, fmt.Errorf("%w: could not get traces for %x", err, body.Hash[:])
+	// 	}
+	// }
 
 	// Convert all txs to loaded txs
 	txs := make([]*types.Transaction, len(body.Transactions))
@@ -381,13 +284,18 @@ func (ec *Client) getBlock(
 			continue
 		}
 
+		// TODO: these are all null as of now
 		loadedTxs[i].Trace = traces[i].Result
 		loadedTxs[i].RawTrace = rawTraces[i].Result
 	}
 
-	return types.NewBlockWithHeader(&head).WithBody(txs, uncles), loadedTxs, nil
+	return types.NewBlockWithHeader(&head).WithBody(
+		txs,
+		nil, // Sequencer blocks do not have uncles with instant confirmation
+	), loadedTxs, nil
 }
 
+// TODO: doesn't work on Optimism block rn
 func (ec *Client) getBlockTraces(
 	ctx context.Context,
 	blockHash common.Hash,
@@ -762,6 +670,7 @@ type loadedTransaction struct {
 	Receipt  *types.Receipt
 }
 
+// TODO: make this optimism compliant
 func feeOps(tx *loadedTransaction) []*RosettaTypes.Operation {
 	return []*RosettaTypes.Operation{
 		{
@@ -1166,6 +1075,7 @@ type rpcProgress struct {
 	KnownStates   hexutil.Uint64
 }
 
+// TODO: make this a sequencer height check instead
 // syncProgress retrieves the current progress of the sync algorithm. If there's
 // no sync currently running, it returns nil.
 func (ec *Client) syncProgress(ctx context.Context) (*ethereum.SyncProgress, error) {
