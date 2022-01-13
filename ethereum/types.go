@@ -164,6 +164,8 @@ var (
 		Index: GenesisBlockIndex,
 	}
 
+	// TODO: add Optimism
+
 	// Currency is the *types.Currency for all
 	// Ethereum networks.
 	Currency = &types.Currency{
