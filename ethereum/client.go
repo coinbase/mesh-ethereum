@@ -45,6 +45,10 @@ const (
 
 	maxTraceConcurrency  = int64(16) // nolint:gomnd
 	semaphoreTraceWeight = int64(1)  // nolint:gomnd
+
+	// eip1559TxType is the EthTypes.Transaction.Type() value that indicates this transaction
+	// follows EIP-1559.
+	eip1559TxType = 2
 )
 
 // Client allows for querying a set of specific Ethereum endpoints in an
@@ -367,12 +371,19 @@ func (ec *Client) getBlock(
 	for i, tx := range body.Transactions {
 		txs[i] = tx.tx
 		receipt := receipts[i]
-		gasUsedBig := new(big.Int).SetUint64(receipt.GasUsed)
-		feeAmount := gasUsedBig.Mul(gasUsedBig, txs[i].GasPrice())
-
+		gasUsed := new(big.Int).SetUint64(receipt.GasUsed)
+		gasPrice, err := effectiveGasPrice(txs[i], head.BaseFee)
+		if err != nil {
+			return nil, nil, fmt.Errorf("%w: failure getting effective gas price", err)
+		}
 		loadedTxs[i] = tx.LoadedTransaction()
 		loadedTxs[i].Transaction = txs[i]
-		loadedTxs[i].FeeAmount = feeAmount
+		loadedTxs[i].FeeAmount = new(big.Int).Mul(gasUsed, gasPrice)
+		if head.BaseFee != nil { // EIP-1559
+			loadedTxs[i].FeeBurned = new(big.Int).Mul(gasUsed, head.BaseFee)
+		} else {
+			loadedTxs[i].FeeBurned = nil
+		}
 		loadedTxs[i].Miner = MustChecksum(head.Coinbase.Hex())
 		loadedTxs[i].Receipt = receipt
 
@@ -386,6 +397,21 @@ func (ec *Client) getBlock(
 	}
 
 	return types.NewBlockWithHeader(&head).WithBody(txs, uncles), loadedTxs, nil
+}
+
+// effectiveGasPrice returns the price of gas charged to this transaction to be included in the
+// block.
+func effectiveGasPrice(tx *EthTypes.Transaction, baseFee *big.Int) (*big.Int, error) {
+	if tx.Type() != eip1559TxType {
+		return tx.GasPrice(), nil
+	}
+	// For EIP-1559 the gas price is determined by the base fee & miner tip instead
+	// of the tx-specified gas price.
+	tip, err := tx.EffectiveGasTip(baseFee)
+	if err != nil {
+		return nil, err
+	}
+	return new(big.Int).Add(tip, baseFee), nil
 }
 
 func (ec *Client) getBlockTraces(
@@ -754,6 +780,7 @@ type loadedTransaction struct {
 	BlockNumber *string
 	BlockHash   *common.Hash
 	FeeAmount   *big.Int
+	FeeBurned   *big.Int // nil if no fees were burned
 	Miner       string
 	Status      bool
 
@@ -763,7 +790,13 @@ type loadedTransaction struct {
 }
 
 func feeOps(tx *loadedTransaction) []*RosettaTypes.Operation {
-	return []*RosettaTypes.Operation{
+	var minerEarnedAmount *big.Int
+	if tx.FeeBurned == nil {
+		minerEarnedAmount = tx.FeeAmount
+	} else {
+		minerEarnedAmount = new(big.Int).Sub(tx.FeeAmount, tx.FeeBurned)
+	}
+	ops := []*RosettaTypes.Operation{
 		{
 			OperationIdentifier: &RosettaTypes.OperationIdentifier{
 				Index: 0,
@@ -774,7 +807,7 @@ func feeOps(tx *loadedTransaction) []*RosettaTypes.Operation {
 				Address: MustChecksum(tx.From.String()),
 			},
 			Amount: &RosettaTypes.Amount{
-				Value:    new(big.Int).Neg(tx.FeeAmount).String(),
+				Value:    new(big.Int).Neg(minerEarnedAmount).String(),
 				Currency: Currency,
 			},
 		},
@@ -794,11 +827,29 @@ func feeOps(tx *loadedTransaction) []*RosettaTypes.Operation {
 				Address: MustChecksum(tx.Miner),
 			},
 			Amount: &RosettaTypes.Amount{
-				Value:    tx.FeeAmount.String(),
+				Value:    minerEarnedAmount.String(),
 				Currency: Currency,
 			},
 		},
 	}
+	if tx.FeeBurned == nil {
+		return ops
+	}
+	burntOp := &RosettaTypes.Operation{
+		OperationIdentifier: &RosettaTypes.OperationIdentifier{
+			Index: 2, // nolint:gomnd
+		},
+		Type:   FeeOpType,
+		Status: RosettaTypes.String(SuccessStatus),
+		Account: &RosettaTypes.AccountIdentifier{
+			Address: MustChecksum(tx.From.String()),
+		},
+		Amount: &RosettaTypes.Amount{
+			Value:    new(big.Int).Neg(tx.FeeBurned).String(),
+			Currency: Currency,
+		},
+	}
+	return append(ops, burntOp)
 }
 
 // transactionReceipt returns the receipt of a transaction by transaction hash.

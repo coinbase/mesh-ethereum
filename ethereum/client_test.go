@@ -2339,6 +2339,122 @@ func TestBlock_468194(t *testing.T) {
 	mockGraphQL.AssertExpectations(t)
 }
 
+// Block with EIP-1559 base fee & txs. This block taken from mainnet:
+//   https://etherscan.io/block/0x68985b6b06bb5c6012393145729babb983fc16c50ec5207972ddda02de02f7e2
+// This block has 7 transactions, all EIP-1559 type except the last.
+func TestBlock_13998626(t *testing.T) {
+	mockJSONRPC := &mocks.JSONRPC{}
+	mockGraphQL := &mocks.GraphQL{}
+
+	tc, err := testTraceConfig()
+	assert.NoError(t, err)
+	c := &Client{
+		c:              mockJSONRPC,
+		g:              mockGraphQL,
+		tc:             tc,
+		p:              params.RopstenChainConfig,
+		traceSemaphore: semaphore.NewWeighted(100),
+	}
+
+	ctx := context.Background()
+	mockJSONRPC.On(
+		"CallContext",
+		ctx,
+		mock.Anything,
+		"eth_getBlockByNumber",
+		"0xd59a22",
+		true,
+	).Return(
+		nil,
+	).Run(
+		func(args mock.Arguments) {
+			r := args.Get(1).(*json.RawMessage)
+
+			file, err := ioutil.ReadFile("testdata/block_13998626.json")
+			assert.NoError(t, err)
+
+			*r = json.RawMessage(file)
+		},
+	).Once()
+	mockJSONRPC.On(
+		"CallContext",
+		ctx,
+		mock.Anything,
+		"debug_traceBlockByHash",
+		common.HexToHash("0x68985b6b06bb5c6012393145729babb983fc16c50ec5207972ddda02de02f7e2"),
+		tc,
+	).Return(
+		nil,
+	).Run(
+		func(args mock.Arguments) {
+			r := args.Get(1).(*json.RawMessage)
+
+			file, err := ioutil.ReadFile(
+				"testdata/block_trace_0x68985b6b06bb5c6012393145729babb983fc16c50ec5207972ddda02de02f7e2.json") // nolint
+			assert.NoError(t, err)
+			*r = json.RawMessage(file)
+		},
+	).Once()
+	mockJSONRPC.On(
+		"BatchCallContext",
+		ctx,
+		mock.Anything,
+	).Return(
+		nil,
+	).Run(
+		func(args mock.Arguments) {
+			r := args.Get(1).([]rpc.BatchElem)
+			assert.Len(t, r, 7)
+			for i, txHash := range []string{
+				"0xf121c8c07ed51b6ac2d11fe3f0892bff2221ec9168280d12581ea8ff45e71421",
+				"0xef0748860f1c1ba28a5ae3ae9d2d1133940f7c8090fc862acf48de42b00ae2b5",
+				"0xb240b922161bb0aeaa5ebe67e6cf77311092bd945b9582b8deba61e2ebdde74f",
+				"0xfac8149f95c20f62264991fe15dc74ca77c92ad6e4329496548277fb4d520509",
+				"0x0a4cd36d72c2ed4767c1d228a7aa0638c3e46397f48b6b09f35ed455c851bb04",
+				"0x9ee03d5922b2a901e3fc05d8a6351165b9f211162363c790c98746ef229e395c",
+				"0x0d4a4f924858a5b19f6b931a914701d4258e73fa738da3d38eb3be1d1e862a7a",
+			} {
+				assert.Equal(
+					t,
+					txHash,
+					r[i].Args[0],
+				)
+
+				file, err := ioutil.ReadFile(
+					"testdata/tx_receipt_" + txHash + ".json",
+				) // nolint
+				assert.NoError(t, err)
+
+				receipt := new(types.Receipt)
+				assert.NoError(t, receipt.UnmarshalJSON(file))
+				*(r[i].Result.(**types.Receipt)) = receipt
+			}
+		},
+	).Once()
+
+	correctRaw, err := ioutil.ReadFile("testdata/block_response_13998626.json")
+	assert.NoError(t, err)
+	var correctResp *RosettaTypes.BlockResponse
+	assert.NoError(t, json.Unmarshal(correctRaw, &correctResp))
+
+	resp, err := c.Block(
+		ctx,
+		&RosettaTypes.PartialBlockIdentifier{
+			Index: RosettaTypes.Int64(13998626),
+		},
+	)
+	assert.NoError(t, err)
+
+	// Ensure types match
+	jsonResp, err := jsonifyBlock(resp)
+
+	assert.NoError(t, err)
+	assert.Equal(t, correctResp.Block, jsonResp)
+
+	mockJSONRPC.AssertExpectations(t)
+	mockGraphQL.AssertExpectations(t)
+}
+
 func TestPendingNonceAt(t *testing.T) {
 	mockJSONRPC := &mocks.JSONRPC{}
 	mockGraphQL := &mocks.GraphQL{}
