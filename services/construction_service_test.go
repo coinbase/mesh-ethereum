@@ -26,8 +26,8 @@ import (
 	mocks "github.com/coinbase/rosetta-ethereum/mocks/services"
 
 	"github.com/coinbase/rosetta-sdk-go/types"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/ethereum-optimism/optimism/l2geth/common"
+	"github.com/ethereum-optimism/optimism/l2geth/params"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -52,14 +52,14 @@ func forceMarshalMap(t *testing.T, i interface{}) map[string]interface{} {
 
 func TestConstructionService(t *testing.T) {
 	networkIdentifier = &types.NetworkIdentifier{
-		Network:    ethereum.RopstenNetwork,
+		Network:    ethereum.GoerliNetwork,
 		Blockchain: ethereum.Blockchain,
 	}
 
 	cfg := &configuration.Configuration{
 		Mode:    configuration.Online,
 		Network: networkIdentifier,
-		Params:  params.RopstenChainConfig,
+		Params:  params.GoerliChainConfig,
 	}
 
 	mockClient := &mocks.Client{}

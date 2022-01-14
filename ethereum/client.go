@@ -22,18 +22,15 @@ import (
 	"log"
 	"math/big"
 	"net/http"
-	"strconv"
 	"time"
 
 	RosettaTypes "github.com/coinbase/rosetta-sdk-go/types"
-	"github.com/ethereum/go-ethereum"
-	"github.com/ethereum/go-ethereum/common"
+	ethereum "github.com/ethereum-optimism/optimism/l2geth"
+	"github.com/ethereum-optimism/optimism/l2geth/common"
+	"github.com/ethereum-optimism/optimism/l2geth/core/types"
+	"github.com/ethereum-optimism/optimism/l2geth/params"
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/consensus/ethash"
-	"github.com/ethereum/go-ethereum/core/types"
-	EthTypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/eth/tracers"
-	"github.com/ethereum/go-ethereum/params"
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/ethereum/go-ethereum/rpc"
 	"golang.org/x/sync/semaphore"
@@ -252,17 +249,15 @@ func (ec *Client) getBlock(
 	// We fetch traces last because we want to avoid limiting the number of other
 	// block-related data fetches we perform concurrently (we limit the number of
 	// concurrent traces that are computed to 16 to avoid overwhelming geth).
-	var traces []*rpcCall
-	var rawTraces []*rpcRawCall
+	var traces []*Call
 	var addTraces bool
-	// TODO: optimism currently doesn't support block traces
-	// if head.Number.Int64() != GenesisBlockIndex { // not possible to get traces at genesis
-	// 	addTraces = true
-	// 	traces, rawTraces, err = ec.getBlockTraces(ctx, body.Hash)
-	// 	if err != nil {
-	// 		return nil, nil, fmt.Errorf("%w: could not get traces for %x", err, body.Hash[:])
-	// 	}
-	// }
+	if head.Number.Int64() != GenesisBlockIndex { // not possible to get traces at genesis
+		addTraces = true
+		traces, err = ec.getTransactionTraces(ctx, body.Transactions)
+		if err != nil {
+			return nil, nil, fmt.Errorf("%w: could not get traces for all txs in block %x", err, body.Hash[:])
+		}
+	}
 
 	// Convert all txs to loaded txs
 	txs := make([]*types.Transaction, len(body.Transactions))
@@ -271,7 +266,8 @@ func (ec *Client) getBlock(
 		txs[i] = tx.tx
 		receipt := receipts[i]
 		gasUsedBig := new(big.Int).SetUint64(receipt.GasUsed)
-		feeAmount := gasUsedBig.Mul(gasUsedBig, txs[i].GasPrice())
+		l2feeAmount := gasUsedBig.Mul(gasUsedBig, txs[i].GasPrice())
+		feeAmount := l2feeAmount.Add(l2feeAmount, receipts[i].L1Fee)
 
 		loadedTxs[i] = tx.LoadedTransaction()
 		loadedTxs[i].Transaction = txs[i]
@@ -284,9 +280,7 @@ func (ec *Client) getBlock(
 			continue
 		}
 
-		// TODO: these are all null as of now
-		loadedTxs[i].Trace = traces[i].Result
-		loadedTxs[i].RawTrace = rawTraces[i].Result
+		loadedTxs[i].Trace = traces[i]
 	}
 
 	return types.NewBlockWithHeader(&head).WithBody(
@@ -324,6 +318,37 @@ func (ec *Client) getBlockTraces(
 	}
 
 	return calls, rawCalls, nil
+}
+
+func (ec *Client) getTransactionTraces(
+	ctx context.Context,
+	txs []rpcTransaction,
+) ([]*Call, error) {
+	traces := make([]*Call, len(txs))
+	if len(txs) == 0 {
+		return traces, nil
+	}
+	reqs := make([]rpc.BatchElem, len(txs))
+	for i := range reqs {
+		reqs[i] = rpc.BatchElem{
+			Method: "debug_traceTransaction",
+			Args:   []interface{}{txs[i].tx.Hash().Hex()},
+			Result: &traces[i],
+		}
+	}
+	if err := ec.c.BatchCallContext(ctx, reqs); err != nil {
+		return nil, err
+	}
+	for i := range reqs {
+		if reqs[i].Error != nil {
+			return nil, reqs[i].Error
+		}
+		if traces[i] == nil {
+			return nil, fmt.Errorf("got empty trace for %x", txs[i].tx.Hash().Hex())
+		}
+	}
+
+	return traces, nil
 }
 
 func (ec *Client) getBlockReceipts(
@@ -895,20 +920,21 @@ func convertTime(time uint64) int64 {
 
 func (ec *Client) populateTransactions(
 	blockIdentifier *RosettaTypes.BlockIdentifier,
-	block *EthTypes.Block,
+	block *types.Block,
 	loadedTransactions []*loadedTransaction,
 ) ([]*RosettaTypes.Transaction, error) {
 	transactions := make(
 		[]*RosettaTypes.Transaction,
-		len(block.Transactions())+1, // include reward tx
+		len(block.Transactions()),
 	)
 
-	// Compute reward transaction (block + uncle reward)
-	transactions[0] = ec.blockRewardTransaction(
-		blockIdentifier,
-		block.Coinbase().String(),
-		block.Uncles(),
-	)
+	// TODO: do not need this for optimism
+	// // Compute reward transaction (block + uncle reward)
+	// transactions[0] = ec.blockRewardTransaction(
+	// 	blockIdentifier,
+	// 	block.Coinbase().String(),
+	// 	block.Uncles(),
+	// )
 
 	for i, tx := range loadedTransactions {
 		transaction, err := ec.populateTransaction(
@@ -970,101 +996,6 @@ func (ec *Client) populateTransaction(
 	}
 
 	return populatedTransaction, nil
-}
-
-// miningReward returns the mining reward
-// for a given block height.
-//
-// Source:
-// https://github.com/ethereum/go-ethereum/master/consensus/ethash/consensus.go#L619-L645
-func (ec *Client) miningReward(
-	currentBlock *big.Int,
-) int64 {
-	if currentBlock.Int64() == int64(0) {
-		return big.NewInt(0).Int64()
-	}
-
-	blockReward := ethash.FrontierBlockReward.Int64()
-	if ec.p.IsByzantium(currentBlock) {
-		blockReward = ethash.ByzantiumBlockReward.Int64()
-	}
-
-	if ec.p.IsConstantinople(currentBlock) {
-		blockReward = ethash.ConstantinopleBlockReward.Int64()
-	}
-
-	return blockReward
-}
-
-func (ec *Client) blockRewardTransaction(
-	blockIdentifier *RosettaTypes.BlockIdentifier,
-	miner string,
-	uncles []*EthTypes.Header,
-) *RosettaTypes.Transaction {
-	var ops []*RosettaTypes.Operation
-	miningReward := ec.miningReward(big.NewInt(blockIdentifier.Index))
-
-	// Calculate miner rewards
-	minerReward := miningReward
-	numUncles := len(uncles)
-	if len(uncles) > 0 {
-		reward := new(big.Float)
-		uncleReward := float64(numUncles) / UnclesRewardMultiplier
-		rewardFloat := reward.Mul(big.NewFloat(uncleReward), big.NewFloat(float64(miningReward)))
-		rewardInt, _ := rewardFloat.Int64()
-		minerReward += rewardInt
-	}
-
-	miningRewardOp := &RosettaTypes.Operation{
-		OperationIdentifier: &RosettaTypes.OperationIdentifier{
-			Index: 0,
-		},
-		Type:   MinerRewardOpType,
-		Status: RosettaTypes.String(SuccessStatus),
-		Account: &RosettaTypes.AccountIdentifier{
-			Address: MustChecksum(miner),
-		},
-		Amount: &RosettaTypes.Amount{
-			Value:    strconv.FormatInt(minerReward, 10),
-			Currency: Currency,
-		},
-	}
-	ops = append(ops, miningRewardOp)
-
-	// Calculate uncle rewards
-	for _, b := range uncles {
-		uncleMiner := b.Coinbase.String()
-		uncleBlock := b.Number.Int64()
-		uncleRewardBlock := new(
-			big.Int,
-		).Mul(
-			big.NewInt(uncleBlock+MaxUncleDepth-blockIdentifier.Index),
-			big.NewInt(miningReward/MaxUncleDepth),
-		)
-
-		uncleRewardOp := &RosettaTypes.Operation{
-			OperationIdentifier: &RosettaTypes.OperationIdentifier{
-				Index: int64(len(ops)),
-			},
-			Type:   UncleRewardOpType,
-			Status: RosettaTypes.String(SuccessStatus),
-			Account: &RosettaTypes.AccountIdentifier{
-				Address: MustChecksum(uncleMiner),
-			},
-			Amount: &RosettaTypes.Amount{
-				Value:    uncleRewardBlock.String(),
-				Currency: Currency,
-			},
-		}
-		ops = append(ops, uncleRewardOp)
-	}
-
-	return &RosettaTypes.Transaction{
-		TransactionIdentifier: &RosettaTypes.TransactionIdentifier{
-			Hash: blockIdentifier.Hash,
-		},
-		Operations: ops,
-	}
 }
 
 type rpcProgress struct {
