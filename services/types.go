@@ -53,6 +53,8 @@ type Client interface {
 
 	SendTransaction(ctx context.Context, tx *ethTypes.Transaction) error
 
+	GetMempool(ctx context.Context) (*types.MempoolResponse, error)
+
 	Call(
 		ctx context.Context,
 		request *types.CallRequest,
