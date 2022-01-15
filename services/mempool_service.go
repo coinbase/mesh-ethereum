@@ -17,25 +17,43 @@ package services
 import (
 	"context"
 
+	"github.com/coinbase/rosetta-ethereum/configuration"
 	"github.com/coinbase/rosetta-sdk-go/server"
 	"github.com/coinbase/rosetta-sdk-go/types"
 )
 
 // MempoolAPIService implements the server.MempoolAPIServicer interface.
 type MempoolAPIService struct {
+	config *configuration.Configuration
+	client Client
 }
 
 // NewMempoolAPIService creates a new instance of a MempoolAPIService.
-func NewMempoolAPIService() server.MempoolAPIServicer {
-	return &MempoolAPIService{}
+func NewMempoolAPIService(
+	config *configuration.Configuration,
+	client Client,
+) server.MempoolAPIServicer {
+	return &MempoolAPIService{
+		config: config,
+		client: client,
+	}
 }
 
 // Mempool implements the /mempool endpoint.
 func (s *MempoolAPIService) Mempool(
 	ctx context.Context,
-	request *types.NetworkRequest,
+	_ *types.NetworkRequest,
 ) (*types.MempoolResponse, *types.Error) {
-	return nil, wrapErr(ErrUnimplemented, nil)
+	if s.config.Mode != configuration.Online {
+		return nil, ErrUnavailableOffline
+	}
+
+	response, err := s.client.GetMempool(ctx)
+	if err != nil {
+		return nil, wrapErr(ErrGeth, err)
+	}
+
+	return response, nil
 }
 
 // MempoolTransaction implements the /mempool/transaction endpoint.
