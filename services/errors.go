@@ -36,6 +36,7 @@ var (
 		ErrBlockOrphaned,
 		ErrInvalidAddress,
 		ErrGethNotReady,
+		ErrInvalidInput,
 	}
 
 	// ErrUnimplemented is returned when an endpoint
@@ -143,6 +144,13 @@ var (
 		Code:      13, //nolint
 		Message:   "geth not ready",
 		Retriable: true,
+	}
+
+	// ErrInvalidInput is returned when client
+	// has provided invalid input
+	ErrInvalidInput = &types.Error{
+		Code:    14, //nolint
+		Message: "invalid input",
 	}
 )
 

@@ -1461,6 +1461,21 @@ func jsonifyBlock(b *RosettaTypes.Block) (*RosettaTypes.Block, error) {
 	return &bo, nil
 }
 
+//func TestTransaction_Hash(t *testing.T) {
+//	mockJSONRPC := &mocks.JSONRPC{}
+//	mockGraphQL := &mocks.GraphQL{}
+//
+//	tc, err := testTraceConfig()
+//	assert.NoError(t, err)
+//	c := &Client{
+//		c:              mockJSONRPC,
+//		g:              mockGraphQL,
+//		tc:             tc,
+//		p:              params.RopstenChainConfig,
+//		traceSemaphore: semaphore.NewWeighted(100),
+//	}
+//}
+
 // Block with transaction
 func TestBlock_10994(t *testing.T) {
 	mockJSONRPC := &mocks.JSONRPC{}

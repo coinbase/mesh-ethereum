@@ -68,5 +68,27 @@ func (s *BlockAPIService) BlockTransaction(
 	ctx context.Context,
 	request *types.BlockTransactionRequest,
 ) (*types.BlockTransactionResponse, *types.Error) {
-	return nil, wrapErr(ErrUnimplemented, nil)
+	if s.config.Mode != configuration.Online {
+		return nil, ErrUnavailableOffline
+	}
+
+	if request.BlockIdentifier == nil || request.TransactionIdentifier == nil {
+		return nil, wrapErr(ErrInvalidInput, errors.New("block_identifier or transaction_identifier cannot be empty"))
+	}
+	if request.BlockIdentifier.Hash == "" && request.BlockIdentifier.Index != 0{
+		return nil, wrapErr(ErrInvalidInput, errors.New("at least on of block hash or index should be present"))
+	}
+
+	if request.TransactionIdentifier.Hash == "" {
+		return nil, wrapErr(ErrInvalidInput, errors.New("transaction hash is not provided"))
+	}
+
+	tx, err := s.client.Transaction(ctx, request.BlockIdentifier, request.TransactionIdentifier)
+	if err != nil {
+		return nil, wrapErr(ErrGeth, err)
+	}
+
+	return &types.BlockTransactionResponse{
+		Transaction: tx,
+	}, nil
 }

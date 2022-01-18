@@ -104,7 +104,7 @@ func (ec *Client) Status(ctx context.Context) (
 	[]*RosettaTypes.Peer,
 	error,
 ) {
-	header, err := ec.blockHeader(ctx, nil)
+	header, err := ec.blockHeaderByNumber(ctx, nil)
 	if err != nil {
 		return nil, -1, nil, nil, err
 	}
@@ -210,6 +210,85 @@ func toBlockNumArg(number *big.Int) string {
 	return hexutil.EncodeBig(number)
 }
 
+func (ec *Client) Transaction(
+	ctx context.Context,
+	blockIdentifier *RosettaTypes.BlockIdentifier,
+	transactionIdentifier *RosettaTypes.TransactionIdentifier,
+) (*RosettaTypes.Transaction, error) {
+	if transactionIdentifier.Hash != "" {
+		var raw json.RawMessage
+		err := ec.c.CallContext(ctx, &raw, "eth_getTransactionByHash", transactionIdentifier.Hash)
+		if err != nil {
+			return nil, fmt.Errorf("%w: transaction fetch failed", err)
+		} else if len(raw) == 0 {
+			return nil, ethereum.NotFound
+		}
+
+		// Decode transaction
+		var body rpcTransaction
+
+		if err := json.Unmarshal(raw, &body); err != nil {
+			return nil, err
+		}
+
+		var header *types.Header
+		if blockIdentifier.Hash != ""{
+			header, err = ec.blockHeaderByHash(ctx, blockIdentifier.Hash)
+		} else {
+			header, err = ec.blockHeaderByNumber(ctx, big.NewInt(blockIdentifier.Index))
+		}
+
+		if err != nil {
+			return nil, fmt.Errorf("%w: could not get block header for %x", err, blockIdentifier.Hash)
+		}
+
+		receipt, err := ec.transactionReceipt(ctx, body.tx.Hash())
+		if receipt.BlockHash != *body.BlockHash {
+			return nil, fmt.Errorf(
+				"%w: expected block hash %s for transaction but got %s",
+				ErrBlockOrphaned,
+				body.BlockHash.Hex(),
+				receipt.BlockHash.Hex(),
+			)
+		}
+		if err != nil {
+			return nil, fmt.Errorf("%w: could not get receipt for %x", err, body.tx.Hash())
+		}
+
+		var traces *Call
+		var rawTraces json.RawMessage
+		var addTraces bool
+		if header.Number.Int64() != GenesisBlockIndex { // not possible to get traces at genesis
+			addTraces = true
+			traces, rawTraces, err = ec.getTransactionTraces(ctx, body.tx.Hash())
+			if err != nil {
+				return nil, fmt.Errorf("%w: could not get traces for %x", err, body.tx.Hash())
+			}
+		}
+
+		gasUsedBig := new(big.Int).SetUint64(receipt.GasUsed)
+		feeAmount := gasUsedBig.Mul(gasUsedBig, body.tx.GasPrice())
+
+		loadedTxs := body.LoadedTransaction()
+		loadedTxs.Transaction = body.tx
+		loadedTxs.FeeAmount = feeAmount
+		loadedTxs.Miner = MustChecksum(header.Coinbase.Hex())
+		loadedTxs.Receipt = receipt
+
+		if addTraces {
+			loadedTxs.Trace = traces
+			loadedTxs.RawTrace = rawTraces
+		}
+
+		tx, err := ec.populateTransaction(loadedTxs)
+		if err != nil {
+			return nil, fmt.Errorf("%w: cannot parse %s", err, loadedTxs.Transaction.Hash().Hex())
+		}
+		return tx, nil
+	}
+	return nil, errors.New("unimplemented")
+}
+
 // Block returns a populated block at the *RosettaTypes.PartialBlockIdentifier.
 // If neither the hash or index is populated in the *RosettaTypes.PartialBlockIdentifier,
 // the current block is returned.
@@ -237,9 +316,24 @@ func (ec *Client) Block(
 
 // Header returns a block header from the current canonical chain. If number is
 // nil, the latest known header is returned.
-func (ec *Client) blockHeader(ctx context.Context, number *big.Int) (*types.Header, error) {
+func (ec *Client) blockHeaderByNumber(ctx context.Context, number *big.Int) (*types.Header, error) {
 	var head *types.Header
 	err := ec.c.CallContext(ctx, &head, "eth_getBlockByNumber", toBlockNumArg(number), false)
+	if err == nil && head == nil {
+		return nil, ethereum.NotFound
+	}
+
+	return head, err
+}
+
+// Header returns a block header from the current canonical chain. If hash is empty
+// it returns error.
+func (ec *Client) blockHeaderByHash(ctx context.Context, hash string) (*types.Header, error) {
+	var head *types.Header
+	if hash == "" {
+		return nil, errors.New("hash is empty")
+	}
+	err := ec.c.CallContext(ctx, &head, "eth_getBlockByHash", hash, false)
 	if err == nil && head == nil {
 		return nil, ethereum.NotFound
 	}
@@ -412,6 +506,31 @@ func effectiveGasPrice(tx *EthTypes.Transaction, baseFee *big.Int) (*big.Int, er
 		return nil, err
 	}
 	return new(big.Int).Add(tip, baseFee), nil
+}
+
+func (ec *Client) getTransactionTraces(
+	ctx context.Context,
+	transactionHash common.Hash,
+) (*Call, json.RawMessage, error) {
+	if err := ec.traceSemaphore.Acquire(ctx, semaphoreTraceWeight); err != nil {
+		return nil, nil, err
+	}
+	defer ec.traceSemaphore.Release(semaphoreTraceWeight)
+
+	var call *Call
+	var raw json.RawMessage
+	err := ec.c.CallContext(ctx, &raw, "debug_traceTransaction", transactionHash, ec.tc)
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// Decode *Call
+	if err := json.Unmarshal(raw, &call); err != nil {
+		return nil, nil, err
+	}
+
+	return call, raw, nil
 }
 
 func (ec *Client) getBlockTraces(
