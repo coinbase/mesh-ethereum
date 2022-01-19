@@ -27,9 +27,9 @@ import (
 	RosettaTypes "github.com/coinbase/rosetta-sdk-go/types"
 	ethereum "github.com/ethereum-optimism/optimism/l2geth"
 	"github.com/ethereum-optimism/optimism/l2geth/common"
+	"github.com/ethereum-optimism/optimism/l2geth/common/hexutil"
 	"github.com/ethereum-optimism/optimism/l2geth/core/types"
 	"github.com/ethereum-optimism/optimism/l2geth/params"
-	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/eth/tracers"
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/ethereum/go-ethereum/rpc"
@@ -695,7 +695,6 @@ type loadedTransaction struct {
 	Receipt  *types.Receipt
 }
 
-// TODO: make this optimism compliant
 func feeOps(tx *loadedTransaction) []*RosettaTypes.Operation {
 	return []*RosettaTypes.Operation{
 		{

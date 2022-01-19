@@ -20,7 +20,7 @@ import (
 
 	"github.com/coinbase/rosetta-sdk-go/types"
 	"github.com/ethereum-optimism/optimism/l2geth/params"
-	"github.com/ethereum/go-ethereum/rpc"
+	"github.com/ethereum-optimism/optimism/l2geth/rpc"
 )
 
 const (
