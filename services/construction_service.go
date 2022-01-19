@@ -24,9 +24,9 @@ import (
 	"github.com/coinbase/rosetta-ethereum/configuration"
 	"github.com/coinbase/rosetta-ethereum/ethereum"
 
-	"github.com/ethereum/go-ethereum/common"
-	ethTypes "github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum-optimism/optimism/l2geth/common"
+	ethTypes "github.com/ethereum-optimism/optimism/l2geth/core/types"
+	"github.com/ethereum-optimism/optimism/l2geth/crypto"
 
 	"github.com/coinbase/rosetta-sdk-go/parser"
 	"github.com/coinbase/rosetta-sdk-go/types"
@@ -372,7 +372,7 @@ func (s *ConstructionAPIService) ConstructionParse(
 		tx.GasLimit = t.Gas()
 		tx.ChainID = t.ChainId()
 
-		msg, err := t.AsMessage(ethTypes.NewEIP155Signer(t.ChainId()), nil)
+		msg, err := t.AsMessage(ethTypes.NewEIP155Signer(t.ChainId()))
 		if err != nil {
 			return nil, wrapErr(ErrUnableToParseIntermediateResult, err)
 		}

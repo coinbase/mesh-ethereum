@@ -20,9 +20,9 @@ import (
 	"math/big"
 
 	"github.com/coinbase/rosetta-sdk-go/types"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	ethTypes "github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum-optimism/optimism/l2geth/common"
+	"github.com/ethereum-optimism/optimism/l2geth/common/hexutil"
+	ethTypes "github.com/ethereum-optimism/optimism/l2geth/core/types"
 )
 
 // Client is used by the servicers to get block

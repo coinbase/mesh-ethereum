@@ -3,9 +3,11 @@ module github.com/coinbase/rosetta-ethereum
 require (
 	github.com/OneOfOne/xxhash v1.2.5 // indirect
 	github.com/coinbase/rosetta-sdk-go v0.7.2
+	github.com/ethereum-optimism/optimism/l2geth v0.0.0-20220114204135-235c7af1e077 // indirect
 	github.com/ethereum/go-ethereum v1.10.13
 	github.com/fatih/color v1.13.0
 	github.com/go-kit/kit v0.9.0 // indirect
+	github.com/rs/cors v1.8.2 // indirect
 	github.com/spf13/cobra v1.2.1
 	github.com/stretchr/testify v1.7.0
 	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616 // indirect

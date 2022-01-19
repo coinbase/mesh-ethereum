@@ -23,7 +23,7 @@ import (
 	"github.com/coinbase/rosetta-ethereum/ethereum"
 
 	"github.com/coinbase/rosetta-sdk-go/types"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/ethereum-optimism/optimism/l2geth/params"
 )
 
 // Mode is the setting that determines if
@@ -132,14 +132,6 @@ func LoadConfiguration() (*Configuration, error) {
 		config.GenesisBlockIdentifier = ethereum.MainnetGenesisBlockIdentifier
 		config.Params = params.MainnetChainConfig
 		config.GethArguments = ethereum.MainnetGethArguments
-	case Testnet, Ropsten:
-		config.Network = &types.NetworkIdentifier{
-			Blockchain: ethereum.Blockchain,
-			Network:    ethereum.RopstenNetwork,
-		}
-		config.GenesisBlockIdentifier = ethereum.RopstenGenesisBlockIdentifier
-		config.Params = params.RopstenChainConfig
-		config.GethArguments = ethereum.RopstenGethArguments
 	case Rinkeby:
 		config.Network = &types.NetworkIdentifier{
 			Blockchain: ethereum.Blockchain,

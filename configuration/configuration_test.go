@@ -22,7 +22,7 @@ import (
 	"github.com/coinbase/rosetta-ethereum/ethereum"
 
 	"github.com/coinbase/rosetta-sdk-go/types"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/ethereum-optimism/optimism/l2geth/params"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -89,23 +89,6 @@ func TestLoadConfiguration(t *testing.T) {
 				SkipGethAdmin:          true,
 			},
 		},
-		"all set (ropsten)": {
-			Mode:    string(Online),
-			Network: Ropsten,
-			Port:    "1000",
-			cfg: &Configuration{
-				Mode: Online,
-				Network: &types.NetworkIdentifier{
-					Network:    ethereum.RopstenNetwork,
-					Blockchain: ethereum.Blockchain,
-				},
-				Params:                 params.RopstenChainConfig,
-				GenesisBlockIdentifier: ethereum.RopstenGenesisBlockIdentifier,
-				Port:                   1000,
-				GethURL:                DefaultGethURL,
-				GethArguments:          ethereum.RopstenGethArguments,
-			},
-		},
 		"all set (rinkeby)": {
 			Mode:    string(Online),
 			Network: Rinkeby,
@@ -148,20 +131,20 @@ func TestLoadConfiguration(t *testing.T) {
 			cfg: &Configuration{
 				Mode: Online,
 				Network: &types.NetworkIdentifier{
-					Network:    ethereum.RopstenNetwork,
+					Network:    ethereum.GoerliNetwork,
 					Blockchain: ethereum.Blockchain,
 				},
-				Params:                 params.RopstenChainConfig,
-				GenesisBlockIdentifier: ethereum.RopstenGenesisBlockIdentifier,
+				Params:                 params.GoerliChainConfig,
+				GenesisBlockIdentifier: ethereum.GoerliGenesisBlockIdentifier,
 				Port:                   1000,
 				GethURL:                DefaultGethURL,
-				GethArguments:          ethereum.RopstenGethArguments,
+				GethArguments:          ethereum.GoerliGethArguments,
 				SkipGethAdmin:          true,
 			},
 		},
 		"invalid mode": {
 			Mode:    "bad mode",
-			Network: Ropsten,
+			Network: Goerli,
 			Port:    "1000",
 			err:     errors.New("bad mode is not a valid mode"),
 		},
@@ -173,7 +156,7 @@ func TestLoadConfiguration(t *testing.T) {
 		},
 		"invalid port": {
 			Mode:    string(Offline),
-			Network: Ropsten,
+			Network: Goerli,
 			Port:    "bad port",
 			err:     errors.New("unable to parse port bad port"),
 		},
