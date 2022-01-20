@@ -27,8 +27,8 @@ const (
 	// NodeVersion is the version of geth we are using.
 	NodeVersion = "1.9.24"
 
-	// Blockchain is Ethereum.
-	Blockchain string = "Ethereum"
+	// Blockchain is Optimism.
+	Blockchain string = "Optimism"
 
 	// MainnetNetwork is the value of the network
 	// in MainnetNetworkIdentifier.
@@ -57,10 +57,6 @@ const (
 	// MinerRewardOpType is used to describe
 	// a miner block reward.
 	MinerRewardOpType = "MINER_REWARD"
-
-	// UncleRewardOpType is used to describe
-	// an uncle block reward.
-	UncleRewardOpType = "UNCLE_REWARD"
 
 	// FeeOpType is used to represent fee operations.
 	FeeOpType = "FEE"
@@ -102,14 +98,6 @@ const (
 	// HistoricalBalanceSupported is whether
 	// historical balance is supported.
 	HistoricalBalanceSupported = true
-
-	// UnclesRewardMultiplier is the uncle reward
-	// multiplier.
-	UnclesRewardMultiplier = 32
-
-	// MaxUncleDepth is the maximum depth for
-	// an uncle to be rewarded.
-	MaxUncleDepth = 8
 
 	// GenesisBlockIndex is the index of the
 	// genesis block.
@@ -157,7 +145,7 @@ var (
 		Index: GenesisBlockIndex,
 	}
 
-	// TODO: add Optimism
+	// TODO: add Optimistic Kovan
 
 	// Currency is the *types.Currency for all
 	// Ethereum networks.
@@ -169,7 +157,6 @@ var (
 	// OperationTypes are all suppoorted operation types.
 	OperationTypes = []string{
 		MinerRewardOpType,
-		UncleRewardOpType,
 		FeeOpType,
 		CallOpType,
 		CreateOpType,

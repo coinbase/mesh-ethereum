@@ -1,6 +1,6 @@
 {
   "network": {
-    "blockchain": "Ethereum",
+    "blockchain": "Optimism",
     "network": "Mainnet"
   },
   "online_url": "http://localhost:8080",

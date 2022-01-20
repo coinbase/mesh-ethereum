@@ -30,9 +30,9 @@ import (
 	"github.com/ethereum-optimism/optimism/l2geth/common/hexutil"
 	"github.com/ethereum-optimism/optimism/l2geth/core/types"
 	"github.com/ethereum-optimism/optimism/l2geth/params"
+	"github.com/ethereum-optimism/optimism/l2geth/rlp"
+	"github.com/ethereum-optimism/optimism/l2geth/rpc"
 	"github.com/ethereum/go-ethereum/eth/tracers"
-	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/ethereum/go-ethereum/rpc"
 	"golang.org/x/sync/semaphore"
 )
 
@@ -103,6 +103,8 @@ func (ec *Client) Status(ctx context.Context) (
 	}
 
 	// TODO: Redo sync status with comparison to sequencer here
+	// TODO: use rollup_getInfo instead
+	// https://community.optimism.io/docs/developers/l2/json-rpc.html#rollup-getinfo
 	// progress, err := ec.syncProgress(ctx)
 	// if err != nil {
 	// 	return nil, -1, nil, nil, err
@@ -287,37 +289,6 @@ func (ec *Client) getBlock(
 		txs,
 		nil, // Sequencer blocks do not have uncles with instant confirmation
 	), loadedTxs, nil
-}
-
-// TODO: doesn't work on Optimism block rn
-func (ec *Client) getBlockTraces(
-	ctx context.Context,
-	blockHash common.Hash,
-) ([]*rpcCall, []*rpcRawCall, error) {
-	if err := ec.traceSemaphore.Acquire(ctx, semaphoreTraceWeight); err != nil {
-		return nil, nil, err
-	}
-	defer ec.traceSemaphore.Release(semaphoreTraceWeight)
-
-	var calls []*rpcCall
-	var rawCalls []*rpcRawCall
-	var raw json.RawMessage
-	err := ec.c.CallContext(ctx, &raw, "debug_traceBlockByHash", blockHash, ec.tc)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	// Decode []*rpcCall
-	if err := json.Unmarshal(raw, &calls); err != nil {
-		return nil, nil, err
-	}
-
-	// Decode []*rpcRawCall
-	if err := json.Unmarshal(raw, &rawCalls); err != nil {
-		return nil, nil, err
-	}
-
-	return calls, rawCalls, nil
 }
 
 func (ec *Client) getTransactionTraces(
@@ -927,7 +898,7 @@ func (ec *Client) populateTransactions(
 		len(block.Transactions()),
 	)
 
-	// TODO: do not need this for optimism
+	// TODO: do not need this for optimism, but need to confirm
 	// // Compute reward transaction (block + uncle reward)
 	// transactions[0] = ec.blockRewardTransaction(
 	// 	blockIdentifier,
@@ -943,7 +914,7 @@ func (ec *Client) populateTransactions(
 			return nil, fmt.Errorf("%w: cannot parse %s", err, tx.Transaction.Hash().Hex())
 		}
 
-		transactions[i+1] = transaction
+		transactions[i] = transaction
 	}
 
 	return transactions, nil
@@ -968,18 +939,19 @@ func (ec *Client) populateTransaction(
 	// TODO: replace with marshalJSONMap (used in `services`)
 	receiptBytes, err := tx.Receipt.MarshalJSON()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%w: cannot marshal receipt json", err)
 	}
 
 	var receiptMap map[string]interface{}
 	if err := json.Unmarshal(receiptBytes, &receiptMap); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%w: cannot unmarshal receipt bytes into map", err)
 	}
 
-	var traceMap map[string]interface{}
-	if err := json.Unmarshal(tx.RawTrace, &traceMap); err != nil {
-		return nil, err
-	}
+	// TODO: Currently not saving raw trace
+	// var traceMap map[string]interface{}
+	// if err := json.Unmarshal(tx.RawTrace, &traceMap); err != nil {
+	// 	return nil, fmt.Errorf("%w: cannot unmarshal raw trace", err)
+	// }
 
 	populatedTransaction := &RosettaTypes.Transaction{
 		TransactionIdentifier: &RosettaTypes.TransactionIdentifier{
@@ -990,7 +962,7 @@ func (ec *Client) populateTransaction(
 			"gas_limit": hexutil.EncodeUint64(tx.Transaction.Gas()),
 			"gas_price": hexutil.EncodeBig(tx.Transaction.GasPrice()),
 			"receipt":   receiptMap,
-			"trace":     traceMap,
+			// "trace":     traceMap, // TODO: use non-raw trace
 		},
 	}
 
