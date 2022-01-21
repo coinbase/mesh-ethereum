@@ -17,6 +17,7 @@ package configuration
 import (
 	"errors"
 	"fmt"
+	"math/big"
 	"os"
 	"strconv"
 
@@ -41,12 +42,6 @@ const (
 
 	// Mainnet is the Ethereum Mainnet.
 	Mainnet string = "MAINNET"
-
-	// Ropsten is the Ethereum Ropsten testnet.
-	Ropsten string = "ROPSTEN"
-
-	// Rinkeby is the Ethereum Rinkeby testnet.
-	Rinkeby string = "RINKEBY"
 
 	// Goerli is the Ethereum Görli testnet.
 	Goerli string = "GOERLI"
@@ -131,15 +126,17 @@ func LoadConfiguration() (*Configuration, error) {
 		}
 		config.GenesisBlockIdentifier = optimism.MainnetGenesisBlockIdentifier
 		config.Params = params.MainnetChainConfig
+		config.Params.ChainID = big.NewInt(10) // TODO: temporary fix without param update
 		config.GethArguments = optimism.MainnetGethArguments
-	case Rinkeby:
+	case Testnet:
 		config.Network = &types.NetworkIdentifier{
 			Blockchain: optimism.Blockchain,
-			Network:    optimism.RinkebyNetwork,
+			Network:    optimism.TestnetNetwork,
 		}
-		config.GenesisBlockIdentifier = optimism.RinkebyGenesisBlockIdentifier
-		config.Params = params.RinkebyChainConfig
-		config.GethArguments = optimism.RinkebyGethArguments
+		config.GenesisBlockIdentifier = optimism.TestnetGenesisBlockIdentifier
+		config.Params = params.TestnetChainConfig
+		config.Params.ChainID = big.NewInt(69) // TODO: temporary fix without param update
+		config.GethArguments = optimism.TestnetGethArguments
 	case Goerli:
 		config.Network = &types.NetworkIdentifier{
 			Blockchain: optimism.Blockchain,

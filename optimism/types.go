@@ -34,13 +34,9 @@ const (
 	// in MainnetNetworkIdentifier.
 	MainnetNetwork string = "Mainnet"
 
-	// RopstenNetwork is the value of the network
-	// in RopstenNetworkIdentifier.
-	RopstenNetwork string = "Ropsten"
-
-	// RinkebyNetwork is the value of the network
-	// in RinkebyNetworkNetworkIdentifier.
-	RinkebyNetwork string = "Rinkeby"
+	// TestnetNetwork is the value of the network
+	// in TestnetNetworkIdentifier.
+	TestnetNetwork string = "Testnet"
 
 	// GoerliNetwork is the value of the network
 	// in GoerliNetworkNetworkIdentifier.
@@ -115,8 +111,8 @@ const (
 )
 
 var (
-	// RopstenGethArguments are the arguments to start a ropsten geth instance.
-	RopstenGethArguments = fmt.Sprintf("%s --ropsten", MainnetGethArguments)
+	// TestnetGethArguments are the arguments to start a ropsten geth instance.
+	TestnetGethArguments = fmt.Sprintf("%s --testnet", MainnetGethArguments)
 
 	// RinkebyGethArguments are the arguments to start a rinkeby geth instance.
 	RinkebyGethArguments = fmt.Sprintf("%s --rinkeby", MainnetGethArguments)
@@ -131,10 +127,10 @@ var (
 		Index: GenesisBlockIndex,
 	}
 
-	// RinkebyGenesisBlockIdentifier is the *types.BlockIdentifier
-	// of the Ropsten genesis block.
-	RinkebyGenesisBlockIdentifier = &types.BlockIdentifier{
-		Hash:  params.RinkebyGenesisHash.Hex(),
+	// TestnetGenesisBlockIdentifier is the *types.BlockIdentifier
+	// of the testnet genesis block.
+	TestnetGenesisBlockIdentifier = &types.BlockIdentifier{
+		Hash:  params.TestnetGenesisHash.Hex(),
 		Index: GenesisBlockIndex,
 	}
 
@@ -144,8 +140,6 @@ var (
 		Hash:  params.GoerliGenesisHash.Hex(),
 		Index: GenesisBlockIndex,
 	}
-
-	// TODO: add Optimistic Kovan
 
 	// Currency is the *types.Currency for all
 	// Ethereum networks.
