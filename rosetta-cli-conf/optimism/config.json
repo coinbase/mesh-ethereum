@@ -1,6 +1,6 @@
 {
   "network": {
-    "blockchain": "Ethereum",
+    "blockchain": "Optimism",
     "network": "Mainnet"
   },
   "online_url": "http://localhost:8080",
@@ -14,14 +14,14 @@
   "memory_limit_disabled":true,
   "construction": null,
   "data": {
+    "reconciliation_disabled": true,
+    "inactive_discrepancy_search_disabled": true,
+    "balance_tracking_disabled": true,
     "initial_balance_fetch_disabled":true,
     "active_reconciliation_concurrency": 32,
     "bootstrap_balances": "",
     "end_conditions": {
-      "reconciliation_coverage": {
-        "coverage": 0.95,
-        "from_tip": true
-      }
+      "tip": true
     }
   }
 }

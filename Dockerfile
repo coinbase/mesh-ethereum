@@ -56,9 +56,9 @@ RUN cd src \
   && go build
 
 RUN mv src/rosetta-ethereum /app/rosetta-ethereum \
-  && mkdir /app/ethereum \
-  && mv src/ethereum/call_tracer.js /app/ethereum/call_tracer.js \
-  && mv src/ethereum/geth.toml /app/ethereum/geth.toml \
+  && mkdir /app/optimism \
+  && mv src/optimism/call_tracer.js /app/optimism/call_tracer.js \
+  && mv src/optimism/geth.toml /app/optimism/geth.toml \
   && rm -rf src
 
 ## Build Final Image
@@ -77,7 +77,7 @@ WORKDIR /app
 COPY --from=geth-builder /app/geth /app/geth
 
 # Copy binary from rosetta-builder
-COPY --from=rosetta-builder /app/ethereum /app/ethereum
+COPY --from=rosetta-builder /app/optimism /app/optimism
 COPY --from=rosetta-builder /app/rosetta-ethereum /app/rosetta-ethereum
 
 # Set permissions for everything added to /app

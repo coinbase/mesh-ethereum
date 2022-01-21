@@ -20,7 +20,7 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/coinbase/rosetta-ethereum/ethereum"
+	"github.com/coinbase/rosetta-ethereum/optimism"
 
 	"github.com/coinbase/rosetta-sdk-go/types"
 	"github.com/ethereum-optimism/optimism/l2geth/params"
@@ -126,28 +126,28 @@ func LoadConfiguration() (*Configuration, error) {
 	switch networkValue {
 	case Mainnet:
 		config.Network = &types.NetworkIdentifier{
-			Blockchain: ethereum.Blockchain,
-			Network:    ethereum.MainnetNetwork,
+			Blockchain: optimism.Blockchain,
+			Network:    optimism.MainnetNetwork,
 		}
-		config.GenesisBlockIdentifier = ethereum.MainnetGenesisBlockIdentifier
+		config.GenesisBlockIdentifier = optimism.MainnetGenesisBlockIdentifier
 		config.Params = params.MainnetChainConfig
-		config.GethArguments = ethereum.MainnetGethArguments
+		config.GethArguments = optimism.MainnetGethArguments
 	case Rinkeby:
 		config.Network = &types.NetworkIdentifier{
-			Blockchain: ethereum.Blockchain,
-			Network:    ethereum.RinkebyNetwork,
+			Blockchain: optimism.Blockchain,
+			Network:    optimism.RinkebyNetwork,
 		}
-		config.GenesisBlockIdentifier = ethereum.RinkebyGenesisBlockIdentifier
+		config.GenesisBlockIdentifier = optimism.RinkebyGenesisBlockIdentifier
 		config.Params = params.RinkebyChainConfig
-		config.GethArguments = ethereum.RinkebyGethArguments
+		config.GethArguments = optimism.RinkebyGethArguments
 	case Goerli:
 		config.Network = &types.NetworkIdentifier{
-			Blockchain: ethereum.Blockchain,
-			Network:    ethereum.GoerliNetwork,
+			Blockchain: optimism.Blockchain,
+			Network:    optimism.GoerliNetwork,
 		}
-		config.GenesisBlockIdentifier = ethereum.GoerliGenesisBlockIdentifier
+		config.GenesisBlockIdentifier = optimism.GoerliGenesisBlockIdentifier
 		config.Params = params.GoerliChainConfig
-		config.GethArguments = ethereum.GoerliGethArguments
+		config.GethArguments = optimism.GoerliGethArguments
 	case "":
 		return nil, errors.New("NETWORK must be populated")
 	default:

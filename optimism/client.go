@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package ethereum
+package optimism
 
 import (
 	"context"
@@ -25,14 +25,15 @@ import (
 	"time"
 
 	RosettaTypes "github.com/coinbase/rosetta-sdk-go/types"
-	ethereum "github.com/ethereum-optimism/optimism/l2geth"
+	l2geth "github.com/ethereum-optimism/optimism/l2geth"
 	"github.com/ethereum-optimism/optimism/l2geth/common"
 	"github.com/ethereum-optimism/optimism/l2geth/common/hexutil"
 	"github.com/ethereum-optimism/optimism/l2geth/core/types"
 	"github.com/ethereum-optimism/optimism/l2geth/params"
+	"github.com/ethereum-optimism/optimism/l2geth/rlp"
+	"github.com/ethereum-optimism/optimism/l2geth/rpc"
+	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/eth/tracers"
-	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/ethereum/go-ethereum/rpc"
 	"golang.org/x/sync/semaphore"
 )
 
@@ -103,6 +104,8 @@ func (ec *Client) Status(ctx context.Context) (
 	}
 
 	// TODO: Redo sync status with comparison to sequencer here
+	// TODO: use rollup_getInfo instead
+	// https://community.optimism.io/docs/developers/l2/json-rpc.html#rollup-getinfo
 	// progress, err := ec.syncProgress(ctx)
 	// if err != nil {
 	// 	return nil, -1, nil, nil, err
@@ -110,7 +113,7 @@ func (ec *Client) Status(ctx context.Context) (
 
 	var syncStatus *RosettaTypes.SyncStatus
 	currentIndex := int64(header.Number.Uint64())
-	targetIndex := int64(header.Number.Uint64()) // TODO: fetch this from sequencer instead
+	targetIndex := int64(header.Number.Uint64()) // TODO: use rollup_getInfo value
 
 	syncStatus = &RosettaTypes.SyncStatus{
 		CurrentIndex: &currentIndex,
@@ -199,7 +202,7 @@ func (ec *Client) blockHeader(ctx context.Context, number *big.Int) (*types.Head
 	var head *types.Header
 	err := ec.c.CallContext(ctx, &head, "eth_getBlockByNumber", toBlockNumArg(number), false)
 	if err == nil && head == nil {
-		return nil, ethereum.NotFound
+		return nil, l2geth.NotFound
 	}
 
 	return head, err
@@ -225,7 +228,7 @@ func (ec *Client) getBlock(
 	if err != nil {
 		return nil, nil, fmt.Errorf("%w: block fetch failed", err)
 	} else if len(raw) == 0 {
-		return nil, nil, ethereum.NotFound
+		return nil, nil, l2geth.NotFound
 	}
 
 	// Decode header and transactions
@@ -287,37 +290,6 @@ func (ec *Client) getBlock(
 		txs,
 		nil, // Sequencer blocks do not have uncles with instant confirmation
 	), loadedTxs, nil
-}
-
-// TODO: doesn't work on Optimism block rn
-func (ec *Client) getBlockTraces(
-	ctx context.Context,
-	blockHash common.Hash,
-) ([]*rpcCall, []*rpcRawCall, error) {
-	if err := ec.traceSemaphore.Acquire(ctx, semaphoreTraceWeight); err != nil {
-		return nil, nil, err
-	}
-	defer ec.traceSemaphore.Release(semaphoreTraceWeight)
-
-	var calls []*rpcCall
-	var rawCalls []*rpcRawCall
-	var raw json.RawMessage
-	err := ec.c.CallContext(ctx, &raw, "debug_traceBlockByHash", blockHash, ec.tc)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	// Decode []*rpcCall
-	if err := json.Unmarshal(raw, &calls); err != nil {
-		return nil, nil, err
-	}
-
-	// Decode []*rpcRawCall
-	if err := json.Unmarshal(raw, &rawCalls); err != nil {
-		return nil, nil, err
-	}
-
-	return calls, rawCalls, nil
 }
 
 func (ec *Client) getTransactionTraces(
@@ -744,7 +716,7 @@ func (ec *Client) transactionReceipt(
 	err := ec.c.CallContext(ctx, &r, "eth_getTransactionReceipt", txHash)
 	if err == nil {
 		if r == nil {
-			return nil, ethereum.NotFound
+			return nil, l2geth.NotFound
 		}
 	}
 
@@ -767,7 +739,7 @@ func (ec *Client) blockByNumber(
 	err := ec.c.CallContext(ctx, &r, "eth_getBlockByNumber", blockIndex, showTxDetails)
 	if err == nil {
 		if r == nil {
-			return nil, ethereum.NotFound
+			return nil, l2geth.NotFound
 		}
 	}
 
@@ -927,7 +899,7 @@ func (ec *Client) populateTransactions(
 		len(block.Transactions()),
 	)
 
-	// TODO: do not need this for optimism
+	// TODO: do not need this for optimism, but need to confirm
 	// // Compute reward transaction (block + uncle reward)
 	// transactions[0] = ec.blockRewardTransaction(
 	// 	blockIdentifier,
@@ -943,7 +915,7 @@ func (ec *Client) populateTransactions(
 			return nil, fmt.Errorf("%w: cannot parse %s", err, tx.Transaction.Hash().Hex())
 		}
 
-		transactions[i+1] = transaction
+		transactions[i] = transaction
 	}
 
 	return transactions, nil
@@ -958,28 +930,30 @@ func (ec *Client) populateTransaction(
 	feeOps := feeOps(tx)
 	ops = append(ops, feeOps...)
 
+	// TODO: figure out why trace ops look different???
 	// Compute trace operations
-	traces := flattenTraces(tx.Trace, []*flatCall{})
+	// traces := flattenTraces(tx.Trace, []*flatCall{})
 
-	traceOps := traceOps(traces, len(ops))
-	ops = append(ops, traceOps...)
+	// traceOps := traceOps(traces, len(ops))
+	// ops = append(ops, traceOps...)
 
 	// Marshal receipt and trace data
 	// TODO: replace with marshalJSONMap (used in `services`)
 	receiptBytes, err := tx.Receipt.MarshalJSON()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%w: cannot marshal receipt json", err)
 	}
 
 	var receiptMap map[string]interface{}
 	if err := json.Unmarshal(receiptBytes, &receiptMap); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%w: cannot unmarshal receipt bytes into map", err)
 	}
 
-	var traceMap map[string]interface{}
-	if err := json.Unmarshal(tx.RawTrace, &traceMap); err != nil {
-		return nil, err
-	}
+	// TODO: Currently not saving raw trace
+	// var traceMap map[string]interface{}
+	// if err := json.Unmarshal(tx.RawTrace, &traceMap); err != nil {
+	// 	return nil, fmt.Errorf("%w: cannot unmarshal raw trace", err)
+	// }
 
 	populatedTransaction := &RosettaTypes.Transaction{
 		TransactionIdentifier: &RosettaTypes.TransactionIdentifier{
@@ -990,7 +964,7 @@ func (ec *Client) populateTransaction(
 			"gas_limit": hexutil.EncodeUint64(tx.Transaction.Gas()),
 			"gas_price": hexutil.EncodeBig(tx.Transaction.GasPrice()),
 			"receipt":   receiptMap,
-			"trace":     traceMap,
+			// "trace":     traceMap, // TODO: use non-raw trace
 		},
 	}
 

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package ethereum
+package optimism
 
 import (
 	"context"
@@ -23,7 +23,7 @@ import (
 	"math/big"
 	"testing"
 
-	mocks "github.com/coinbase/rosetta-ethereum/mocks/ethereum"
+	mocks "github.com/coinbase/rosetta-ethereum/mocks/optimism"
 
 	RosettaTypes "github.com/coinbase/rosetta-sdk-go/types"
 	ethereum "github.com/ethereum-optimism/optimism/l2geth"

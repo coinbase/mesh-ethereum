@@ -22,8 +22,8 @@ import (
 	"testing"
 
 	"github.com/coinbase/rosetta-ethereum/configuration"
-	"github.com/coinbase/rosetta-ethereum/ethereum"
 	mocks "github.com/coinbase/rosetta-ethereum/mocks/services"
+	"github.com/coinbase/rosetta-ethereum/optimism"
 
 	"github.com/coinbase/rosetta-sdk-go/types"
 	"github.com/ethereum-optimism/optimism/l2geth/common"
@@ -52,8 +52,8 @@ func forceMarshalMap(t *testing.T, i interface{}) map[string]interface{} {
 
 func TestConstructionService(t *testing.T) {
 	networkIdentifier = &types.NetworkIdentifier{
-		Network:    ethereum.GoerliNetwork,
-		Blockchain: ethereum.Blockchain,
+		Network:    optimism.GoerliNetwork,
+		Blockchain: optimism.Blockchain,
 	}
 
 	cfg := &configuration.Configuration{
@@ -135,7 +135,7 @@ func TestConstructionService(t *testing.T) {
 		SuggestedFee: []*types.Amount{
 			{
 				Value:    "21000000000000",
-				Currency: ethereum.Currency,
+				Currency: optimism.Currency,
 			},
 		},
 	}, metadataResponse)
