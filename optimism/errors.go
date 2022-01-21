@@ -12,34 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package ethereum
+package optimism
 
-import (
-	"fmt"
-	"io/ioutil"
+import "errors"
 
-	"github.com/ethereum/go-ethereum/eth/tracers"
-)
-
-// convert raw eth data from client to rosetta
-
-const (
-	tracerPath = "ethereum/call_tracer.js"
-)
-
+// Client errors
 var (
-	tracerTimeout = "120s"
+	ErrBlockOrphaned         = errors.New("block orphaned")
+	ErrCallParametersInvalid = errors.New("call parameters invalid")
+	ErrCallOutputMarshal     = errors.New("call output marshal")
+	ErrCallMethodInvalid     = errors.New("call method invalid")
 )
-
-func loadTraceConfig() (*tracers.TraceConfig, error) {
-	loadedFile, err := ioutil.ReadFile(tracerPath)
-	if err != nil {
-		return nil, fmt.Errorf("%w: could not load tracer file", err)
-	}
-
-	loadedTracer := string(loadedFile)
-	return &tracers.TraceConfig{
-		Timeout: &tracerTimeout,
-		Tracer:  &loadedTracer,
-	}, nil
-}

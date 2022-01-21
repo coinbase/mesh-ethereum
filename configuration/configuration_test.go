@@ -19,7 +19,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/coinbase/rosetta-ethereum/ethereum"
+	"github.com/coinbase/rosetta-ethereum/optimism"
 
 	"github.com/coinbase/rosetta-sdk-go/types"
 	"github.com/ethereum-optimism/optimism/l2geth/params"
@@ -57,14 +57,14 @@ func TestLoadConfiguration(t *testing.T) {
 			cfg: &Configuration{
 				Mode: Online,
 				Network: &types.NetworkIdentifier{
-					Network:    ethereum.MainnetNetwork,
-					Blockchain: ethereum.Blockchain,
+					Network:    optimism.MainnetNetwork,
+					Blockchain: optimism.Blockchain,
 				},
 				Params:                 params.MainnetChainConfig,
-				GenesisBlockIdentifier: ethereum.MainnetGenesisBlockIdentifier,
+				GenesisBlockIdentifier: optimism.MainnetGenesisBlockIdentifier,
 				Port:                   1000,
 				GethURL:                DefaultGethURL,
-				GethArguments:          ethereum.MainnetGethArguments,
+				GethArguments:          optimism.MainnetGethArguments,
 				SkipGethAdmin:          false,
 			},
 		},
@@ -77,15 +77,15 @@ func TestLoadConfiguration(t *testing.T) {
 			cfg: &Configuration{
 				Mode: Online,
 				Network: &types.NetworkIdentifier{
-					Network:    ethereum.MainnetNetwork,
-					Blockchain: ethereum.Blockchain,
+					Network:    optimism.MainnetNetwork,
+					Blockchain: optimism.Blockchain,
 				},
 				Params:                 params.MainnetChainConfig,
-				GenesisBlockIdentifier: ethereum.MainnetGenesisBlockIdentifier,
+				GenesisBlockIdentifier: optimism.MainnetGenesisBlockIdentifier,
 				Port:                   1000,
 				GethURL:                "http://blah",
 				RemoteGeth:             true,
-				GethArguments:          ethereum.MainnetGethArguments,
+				GethArguments:          optimism.MainnetGethArguments,
 				SkipGethAdmin:          true,
 			},
 		},
@@ -96,14 +96,14 @@ func TestLoadConfiguration(t *testing.T) {
 			cfg: &Configuration{
 				Mode: Online,
 				Network: &types.NetworkIdentifier{
-					Network:    ethereum.RinkebyNetwork,
-					Blockchain: ethereum.Blockchain,
+					Network:    optimism.RinkebyNetwork,
+					Blockchain: optimism.Blockchain,
 				},
 				Params:                 params.RinkebyChainConfig,
-				GenesisBlockIdentifier: ethereum.RinkebyGenesisBlockIdentifier,
+				GenesisBlockIdentifier: optimism.RinkebyGenesisBlockIdentifier,
 				Port:                   1000,
 				GethURL:                DefaultGethURL,
-				GethArguments:          ethereum.RinkebyGethArguments,
+				GethArguments:          optimism.RinkebyGethArguments,
 			},
 		},
 		"all set (goerli)": {
@@ -113,14 +113,14 @@ func TestLoadConfiguration(t *testing.T) {
 			cfg: &Configuration{
 				Mode: Online,
 				Network: &types.NetworkIdentifier{
-					Network:    ethereum.GoerliNetwork,
-					Blockchain: ethereum.Blockchain,
+					Network:    optimism.GoerliNetwork,
+					Blockchain: optimism.Blockchain,
 				},
 				Params:                 params.GoerliChainConfig,
-				GenesisBlockIdentifier: ethereum.GoerliGenesisBlockIdentifier,
+				GenesisBlockIdentifier: optimism.GoerliGenesisBlockIdentifier,
 				Port:                   1000,
 				GethURL:                DefaultGethURL,
-				GethArguments:          ethereum.GoerliGethArguments,
+				GethArguments:          optimism.GoerliGethArguments,
 			},
 		},
 		"all set (testnet)": {
@@ -131,14 +131,14 @@ func TestLoadConfiguration(t *testing.T) {
 			cfg: &Configuration{
 				Mode: Online,
 				Network: &types.NetworkIdentifier{
-					Network:    ethereum.GoerliNetwork,
-					Blockchain: ethereum.Blockchain,
+					Network:    optimism.GoerliNetwork,
+					Blockchain: optimism.Blockchain,
 				},
 				Params:                 params.GoerliChainConfig,
-				GenesisBlockIdentifier: ethereum.GoerliGenesisBlockIdentifier,
+				GenesisBlockIdentifier: optimism.GoerliGenesisBlockIdentifier,
 				Port:                   1000,
 				GethURL:                DefaultGethURL,
-				GethArguments:          ethereum.GoerliGethArguments,
+				GethArguments:          optimism.GoerliGethArguments,
 				SkipGethAdmin:          true,
 			},
 		},

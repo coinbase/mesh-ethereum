@@ -19,7 +19,7 @@ import (
 	"errors"
 
 	"github.com/coinbase/rosetta-ethereum/configuration"
-	"github.com/coinbase/rosetta-ethereum/ethereum"
+	"github.com/coinbase/rosetta-ethereum/optimism"
 
 	"github.com/coinbase/rosetta-sdk-go/types"
 )
@@ -48,13 +48,13 @@ func (s *CallAPIService) Call(
 	}
 
 	response, err := s.client.Call(ctx, request)
-	if errors.Is(err, ethereum.ErrCallParametersInvalid) {
+	if errors.Is(err, optimism.ErrCallParametersInvalid) {
 		return nil, wrapErr(ErrCallParametersInvalid, err)
 	}
-	if errors.Is(err, ethereum.ErrCallOutputMarshal) {
+	if errors.Is(err, optimism.ErrCallOutputMarshal) {
 		return nil, wrapErr(ErrCallOutputMarshal, err)
 	}
-	if errors.Is(err, ethereum.ErrCallMethodInvalid) {
+	if errors.Is(err, optimism.ErrCallMethodInvalid) {
 		return nil, wrapErr(ErrCallMethodInvalid, err)
 	}
 	if err != nil {

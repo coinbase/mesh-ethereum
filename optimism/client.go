@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package ethereum
+package optimism
 
 import (
 	"context"
@@ -25,13 +25,14 @@ import (
 	"time"
 
 	RosettaTypes "github.com/coinbase/rosetta-sdk-go/types"
-	ethereum "github.com/ethereum-optimism/optimism/l2geth"
+	l2geth "github.com/ethereum-optimism/optimism/l2geth"
 	"github.com/ethereum-optimism/optimism/l2geth/common"
 	"github.com/ethereum-optimism/optimism/l2geth/common/hexutil"
 	"github.com/ethereum-optimism/optimism/l2geth/core/types"
 	"github.com/ethereum-optimism/optimism/l2geth/params"
 	"github.com/ethereum-optimism/optimism/l2geth/rlp"
 	"github.com/ethereum-optimism/optimism/l2geth/rpc"
+	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/eth/tracers"
 	"golang.org/x/sync/semaphore"
 )
@@ -112,7 +113,7 @@ func (ec *Client) Status(ctx context.Context) (
 
 	var syncStatus *RosettaTypes.SyncStatus
 	currentIndex := int64(header.Number.Uint64())
-	targetIndex := int64(header.Number.Uint64()) // TODO: fetch this from sequencer instead
+	targetIndex := int64(header.Number.Uint64()) // TODO: use rollup_getInfo value
 
 	syncStatus = &RosettaTypes.SyncStatus{
 		CurrentIndex: &currentIndex,
@@ -201,7 +202,7 @@ func (ec *Client) blockHeader(ctx context.Context, number *big.Int) (*types.Head
 	var head *types.Header
 	err := ec.c.CallContext(ctx, &head, "eth_getBlockByNumber", toBlockNumArg(number), false)
 	if err == nil && head == nil {
-		return nil, ethereum.NotFound
+		return nil, l2geth.NotFound
 	}
 
 	return head, err
@@ -227,7 +228,7 @@ func (ec *Client) getBlock(
 	if err != nil {
 		return nil, nil, fmt.Errorf("%w: block fetch failed", err)
 	} else if len(raw) == 0 {
-		return nil, nil, ethereum.NotFound
+		return nil, nil, l2geth.NotFound
 	}
 
 	// Decode header and transactions
@@ -715,7 +716,7 @@ func (ec *Client) transactionReceipt(
 	err := ec.c.CallContext(ctx, &r, "eth_getTransactionReceipt", txHash)
 	if err == nil {
 		if r == nil {
-			return nil, ethereum.NotFound
+			return nil, l2geth.NotFound
 		}
 	}
 
@@ -738,7 +739,7 @@ func (ec *Client) blockByNumber(
 	err := ec.c.CallContext(ctx, &r, "eth_getBlockByNumber", blockIndex, showTxDetails)
 	if err == nil {
 		if r == nil {
-			return nil, ethereum.NotFound
+			return nil, l2geth.NotFound
 		}
 	}
 
@@ -929,11 +930,12 @@ func (ec *Client) populateTransaction(
 	feeOps := feeOps(tx)
 	ops = append(ops, feeOps...)
 
+	// TODO: figure out why trace ops look different???
 	// Compute trace operations
-	traces := flattenTraces(tx.Trace, []*flatCall{})
+	// traces := flattenTraces(tx.Trace, []*flatCall{})
 
-	traceOps := traceOps(traces, len(ops))
-	ops = append(ops, traceOps...)
+	// traceOps := traceOps(traces, len(ops))
+	// ops = append(ops, traceOps...)
 
 	// Marshal receipt and trace data
 	// TODO: replace with marshalJSONMap (used in `services`)

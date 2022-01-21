@@ -15,7 +15,7 @@
 package cmd
 
 import (
-	"github.com/coinbase/rosetta-ethereum/ethereum"
+	"github.com/coinbase/rosetta-ethereum/optimism"
 
 	"github.com/spf13/cobra"
 )
@@ -38,5 +38,5 @@ When calling this command, you must provide 2 arguments:
 )
 
 func runUtilsBootstrapCmd(cmd *cobra.Command, args []string) error {
-	return ethereum.GenerateBootstrapFile(args[0], args[1])
+	return optimism.GenerateBootstrapFile(args[0], args[1])
 }

@@ -19,7 +19,7 @@ import (
 	"errors"
 
 	"github.com/coinbase/rosetta-ethereum/configuration"
-	"github.com/coinbase/rosetta-ethereum/ethereum"
+	"github.com/coinbase/rosetta-ethereum/optimism"
 
 	"github.com/coinbase/rosetta-sdk-go/types"
 )
@@ -51,7 +51,7 @@ func (s *BlockAPIService) Block(
 	}
 
 	block, err := s.client.Block(ctx, request.BlockIdentifier)
-	if errors.Is(err, ethereum.ErrBlockOrphaned) {
+	if errors.Is(err, optimism.ErrBlockOrphaned) {
 		return nil, wrapErr(ErrBlockOrphaned, err)
 	}
 	if err != nil {

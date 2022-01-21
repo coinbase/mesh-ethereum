@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package ethereum
+package optimism
 
 import (
 	"context"
@@ -108,7 +108,7 @@ const (
 	TransferGasLimit = int64(21000) //nolint:gomnd
 
 	// MainnetGethArguments are the arguments to start a mainnet geth instance.
-	MainnetGethArguments = `--config=/app/ethereum/geth.toml --gcmode=archive --graphql`
+	MainnetGethArguments = `--config=/app/optimism/geth.toml --gcmode=archive --graphql`
 
 	// IncludeMempoolCoins does not apply to rosetta-ethereum as it is not UTXO-based.
 	IncludeMempoolCoins = false

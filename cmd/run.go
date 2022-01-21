@@ -23,7 +23,7 @@ import (
 	"time"
 
 	"github.com/coinbase/rosetta-ethereum/configuration"
-	"github.com/coinbase/rosetta-ethereum/ethereum"
+	"github.com/coinbase/rosetta-ethereum/optimism"
 	"github.com/coinbase/rosetta-ethereum/services"
 
 	"github.com/coinbase/rosetta-sdk-go/asserter"
@@ -65,11 +65,11 @@ func runRunCmd(cmd *cobra.Command, args []string) error {
 	// The asserter automatically rejects incorrectly formatted
 	// requests.
 	asserter, err := asserter.NewServer(
-		ethereum.OperationTypes,
-		ethereum.HistoricalBalanceSupported,
+		optimism.OperationTypes,
+		optimism.HistoricalBalanceSupported,
 		[]*types.NetworkIdentifier{cfg.Network},
-		ethereum.CallMethods,
-		ethereum.IncludeMempoolCoins,
+		optimism.CallMethods,
+		optimism.IncludeMempoolCoins,
 		"",
 	)
 	if err != nil {
@@ -83,16 +83,16 @@ func runRunCmd(cmd *cobra.Command, args []string) error {
 
 	g, ctx := errgroup.WithContext(ctx)
 
-	var client *ethereum.Client
+	var client *optimism.Client
 	if cfg.Mode == configuration.Online {
 		if !cfg.RemoteGeth {
 			g.Go(func() error {
-				return ethereum.StartGeth(ctx, cfg.GethArguments, g)
+				return optimism.StartGeth(ctx, cfg.GethArguments, g)
 			})
 		}
 
 		var err error
-		client, err = ethereum.NewClient(cfg.GethURL, cfg.Params, cfg.SkipGethAdmin)
+		client, err = optimism.NewClient(cfg.GethURL, cfg.Params, cfg.SkipGethAdmin)
 		if err != nil {
 			return fmt.Errorf("%w: cannot initialize ethereum client", err)
 		}

@@ -18,7 +18,7 @@ import (
 	"context"
 
 	"github.com/coinbase/rosetta-ethereum/configuration"
-	"github.com/coinbase/rosetta-ethereum/ethereum"
+	"github.com/coinbase/rosetta-ethereum/optimism"
 
 	"github.com/coinbase/rosetta-sdk-go/asserter"
 	"github.com/coinbase/rosetta-sdk-go/types"
@@ -58,16 +58,16 @@ func (s *NetworkAPIService) NetworkOptions(
 ) (*types.NetworkOptionsResponse, *types.Error) {
 	return &types.NetworkOptionsResponse{
 		Version: &types.Version{
-			NodeVersion:       ethereum.NodeVersion,
+			NodeVersion:       optimism.NodeVersion,
 			RosettaVersion:    types.RosettaAPIVersion,
 			MiddlewareVersion: types.String(configuration.MiddlewareVersion),
 		},
 		Allow: &types.Allow{
 			Errors:                  Errors,
-			OperationTypes:          ethereum.OperationTypes,
-			OperationStatuses:       ethereum.OperationStatuses,
-			HistoricalBalanceLookup: ethereum.HistoricalBalanceSupported,
-			CallMethods:             ethereum.CallMethods,
+			OperationTypes:          optimism.OperationTypes,
+			OperationStatuses:       optimism.OperationStatuses,
+			HistoricalBalanceLookup: optimism.HistoricalBalanceSupported,
+			CallMethods:             optimism.CallMethods,
 		},
 	}, nil
 }
