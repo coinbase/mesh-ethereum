@@ -89,6 +89,29 @@ func (_m *Client) Call(ctx context.Context, request *types.CallRequest) (*types.
 	return r0, r1
 }
 
+// GetMempool provides a mock function with given fields: ctx
+func (_m *Client) GetMempool(ctx context.Context) (*types.MempoolResponse, error) {
+	ret := _m.Called(ctx)
+
+	var r0 *types.MempoolResponse
+	if rf, ok := ret.Get(0).(func(context.Context) *types.MempoolResponse); ok {
+		r0 = rf(ctx)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*types.MempoolResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // PendingNonceAt provides a mock function with given fields: _a0, _a1
 func (_m *Client) PendingNonceAt(_a0 context.Context, _a1 common.Address) (uint64, error) {
 	ret := _m.Called(_a0, _a1)

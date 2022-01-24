@@ -21,6 +21,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"math/big"
+	"reflect"
+	"sort"
 	"testing"
 
 	mocks "github.com/coinbase/rosetta-ethereum/mocks/ethereum"
@@ -2391,4 +2393,71 @@ func TestSendTransaction(t *testing.T) {
 
 	mockJSONRPC.AssertExpectations(t)
 	mockGraphQL.AssertExpectations(t)
+}
+
+func TestGetMempool(t *testing.T) {
+	mockJSONRPC := &mocks.JSONRPC{}
+	mockGraphQL := &mocks.GraphQL{}
+	ctx := context.Background()
+	expectedMempool := &RosettaTypes.MempoolResponse{
+		TransactionIdentifiers: []*RosettaTypes.TransactionIdentifier{
+			{Hash: "0x994024ef9f05d1cb25d01572642c1f550c78d214a52c306bb100d22c025b59d4"},
+			{Hash: "0x0859cb844087a280fa031ce2a0879f4f9832f431d6de67f57d0ca32e90dd9e21"},
+			{Hash: "0xa6de13e0a4465c9b55726d0826d020ed179fa1bda882a00e90aa467266af1815"},
+			{Hash: "0x94e28f01121fd56dead7b89c46c8d6ba32bb79dad5f7e29c1d523224479f10f4"},
+			{Hash: "0xf98b8a6589fa27f66545f31d443140c16eaa3da3896e66c4f05a03defa12cda4"},
+			{Hash: "0x4c652b9e779277f06e17b6a4c4db6658ac012f7c93f5eeab80e7802cce3ff556"},
+			{Hash: "0xa81f636c4b47831efd324dce5c48fe3a3d7a4f0020fae063887e8c2765ff1088"},
+			{Hash: "0x3bc19098a49974002ba933ac8f9c753ce5af538ab93fc68586849e8b8b0dce80"},
+			{Hash: "0x3401ec802cbe4b02d5be18717b53bb8177bd746f95a54da4674d7c27620facda"},
+			{Hash: "0x3d1c58eced8f15f3224e9b2579420d078dbd2adba8e825cee91fd306b0943f89"},
+			{Hash: "0xda591f0b15423aedb52f6b0e778b1fbc6757547d69277e2ba1aa7093583d1efb"},
+			{Hash: "0xb39652e66c57a6693e44b92b5c471952c26cabf9442a9a76c372f8690658cb4c"},
+			{Hash: "0x1e8700bf7215b2da0cfadcf34717f387577254e0871d828e5453a0593ce8060f"},
+			{Hash: "0x83811383fb7840a03c25a7cbae7e9af138b17853563eb9e212727be2d0b9667f"},
+			{Hash: "0x1e53751e1312cae3324a6b36c67dc95bfec993d7b4939c0de8c0dc761a0afd31"},
+			{Hash: "0xc1052f9378db5a779c42ae2de9a0b94c8a6357c815446d6ba55485dcc1b187ef"},
+		},
+	}
+
+	c := &Client{
+		c:              mockJSONRPC,
+		g:              mockGraphQL,
+		traceSemaphore: semaphore.NewWeighted(100),
+	}
+
+	mockJSONRPC.On(
+		"CallContext", ctx, mock.Anything, "txpool_content",
+	).Return(
+		nil,
+	).Run(
+		func(args mock.Arguments) {
+			r, ok := args.Get(1).(*TxPoolContentResponse)
+			assert.True(t, ok)
+
+			file, err := ioutil.ReadFile("testdata/txpool_content.json")
+			assert.NoError(t, err)
+
+			err = json.Unmarshal(file, r)
+			assert.NoError(t, err)
+		},
+	).Once()
+
+	actualMempool, err := c.GetMempool(ctx)
+	assert.NoError(t, err)
+
+	assert.Len(t, actualMempool.TransactionIdentifiers, len(expectedMempool.TransactionIdentifiers))
+
+	// Sort both slices to compare later
+	sort.Slice(expectedMempool.TransactionIdentifiers, func(i, j int) bool {
+		return expectedMempool.TransactionIdentifiers[i].Hash < expectedMempool.TransactionIdentifiers[j].Hash
+	})
+
+	sort.Slice(actualMempool.TransactionIdentifiers, func(i, j int) bool {
+		return actualMempool.TransactionIdentifiers[i].Hash < actualMempool.TransactionIdentifiers[j].Hash
+	})
+
+	assert.True(t, reflect.DeepEqual(actualMempool, expectedMempool))
+
+	mockJSONRPC.AssertExpectations(t)
 }

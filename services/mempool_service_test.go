@@ -18,20 +18,61 @@ import (
 	"context"
 	"testing"
 
+	"github.com/coinbase/rosetta-ethereum/configuration"
+	mocks "github.com/coinbase/rosetta-ethereum/mocks/services"
+	"github.com/coinbase/rosetta-sdk-go/types"
+
 	"github.com/stretchr/testify/assert"
 )
 
-func TestMempoolEndpoints(t *testing.T) {
-	servicer := NewMempoolAPIService()
+func TestMempoolService_Offline(t *testing.T) {
+	cfg := &configuration.Configuration{
+		Mode: configuration.Offline,
+	}
+	mockClient := &mocks.Client{}
+	servicer := NewMempoolAPIService(cfg, mockClient)
 	ctx := context.Background()
 
 	mem, err := servicer.Mempool(ctx, nil)
 	assert.Nil(t, mem)
-	assert.Equal(t, ErrUnimplemented.Code, err.Code)
-	assert.Equal(t, ErrUnimplemented.Message, err.Message)
+	assert.Equal(t, ErrUnavailableOffline.Code, err.Code)
+	assert.Equal(t, ErrUnavailableOffline.Message, err.Message)
 
 	memTransaction, err := servicer.MempoolTransaction(ctx, nil)
 	assert.Nil(t, memTransaction)
 	assert.Equal(t, ErrUnimplemented.Code, err.Code)
 	assert.Equal(t, ErrUnimplemented.Message, err.Message)
+
+	mockClient.AssertExpectations(t)
+}
+
+func TestMempoolService_Online(t *testing.T) {
+	cfg := &configuration.Configuration{
+		Mode: configuration.Online,
+	}
+	mockClient := &mocks.Client{}
+	servicer := NewMempoolAPIService(cfg, mockClient)
+	ctx := context.Background()
+
+	mempool := &types.MempoolResponse{
+		TransactionIdentifiers: []*types.TransactionIdentifier{
+			{
+				Hash: "0xb89dbf00e5c1a6ec89a4d42879969e8ea843a6814a783fb5c2bbf712ea1ef071",
+			},
+		},
+	}
+
+	t.Run("mempool", func(t *testing.T) {
+		mockClient.
+			On("GetMempool", ctx).
+			Return(mempool, nil).
+			Once()
+
+		actualMempool, err := servicer.Mempool(ctx, &types.NetworkRequest{})
+
+		assert.Nil(t, err)
+		assert.Equal(t, mempool, actualMempool)
+	})
+
+	mockClient.AssertExpectations(t)
 }
