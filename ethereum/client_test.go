@@ -1394,6 +1394,59 @@ func TestBlock_Index(t *testing.T) {
 	mockGraphQL.AssertExpectations(t)
 }
 
+func TestBlock_FirstBlock(t *testing.T) {
+	mockJSONRPC := &mocks.JSONRPC{}
+	mockGraphQL := &mocks.GraphQL{}
+
+	tc, err := testTraceConfig()
+	assert.NoError(t, err)
+	c := &Client{
+		c:              mockJSONRPC,
+		g:              mockGraphQL,
+		tc:             tc,
+		p:              params.RopstenChainConfig,
+		traceSemaphore: semaphore.NewWeighted(100),
+	}
+
+	ctx := context.Background()
+	mockJSONRPC.On(
+		"CallContext",
+		ctx,
+		mock.Anything,
+		"eth_getBlockByNumber",
+		"0x0",
+		true,
+	).Return(
+		nil,
+	).Run(
+		func(args mock.Arguments) {
+			r := args.Get(1).(*json.RawMessage)
+
+			file, err := ioutil.ReadFile("testdata/block_0.json")
+			assert.NoError(t, err)
+
+			*r = file
+		},
+	).Once()
+
+	correctRaw, err := ioutil.ReadFile("testdata/block_response_0.json")
+	assert.NoError(t, err)
+	var correct *RosettaTypes.BlockResponse
+	assert.NoError(t, json.Unmarshal(correctRaw, &correct))
+
+	resp, err := c.Block(
+		ctx,
+		&RosettaTypes.PartialBlockIdentifier{
+			Index: RosettaTypes.Int64(0),
+		},
+	)
+	assert.Equal(t, correct.Block, resp)
+	assert.NoError(t, err)
+
+	mockJSONRPC.AssertExpectations(t)
+	mockGraphQL.AssertExpectations(t)
+}
+
 func jsonifyBlock(b *RosettaTypes.Block) (*RosettaTypes.Block, error) {
 	bytes, err := json.Marshal(b)
 	if err != nil {
