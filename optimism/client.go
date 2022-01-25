@@ -1043,7 +1043,47 @@ func (ec *Client) Balance(
 			blockQuery = fmt.Sprintf(`hash: "%s"`, *block.Hash)
 		}
 		if block.Hash == nil && block.Index != nil {
-			blockQuery = fmt.Sprintf("number: %d", *block.Index)
+			//blockQuery = fmt.Sprintf("number: %d", *block.Index)
+			var (
+				head    *types.Header
+				balance hexutil.Big
+				nonce   hexutil.Uint64
+				code    string
+			)
+
+			blockNum := hexutil.EncodeUint64(uint64(*block.Index))
+			reqs := []rpc.BatchElem{
+				{Method: "eth_getBlockByNumber", Args: []interface{}{blockNum, false}, Result: &head},
+				{Method: "eth_getBalance", Args: []interface{}{account.Address, blockNum}, Result: &balance},
+				{Method: "eth_getTransactionCount", Args: []interface{}{account.Address, blockNum}, Result: &nonce},
+				{Method: "eth_getCode", Args: []interface{}{account.Address, blockNum}, Result: &code},
+			}
+			if err := ec.c.BatchCallContext(ctx, reqs); err != nil {
+				return nil, err
+			}
+			for i := range reqs {
+				if reqs[i].Error != nil {
+					return nil, reqs[i].Error
+				}
+			}
+
+			return &RosettaTypes.AccountBalanceResponse{
+				Balances: []*RosettaTypes.Amount{
+					{
+						Value:    balance.ToInt().String(),
+						Currency: Currency,
+					},
+				},
+				BlockIdentifier: &RosettaTypes.BlockIdentifier{
+					Hash:  head.Hash().Hex(),
+					Index: *block.Index,
+				},
+				Metadata: map[string]interface{}{
+					"nonce": int64(nonce),
+					"code":  code,
+				},
+			}, nil
+
 		}
 	}
 
