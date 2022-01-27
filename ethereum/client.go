@@ -211,7 +211,7 @@ func toBlockNumArg(number *big.Int) string {
 }
 
 // Transaction returns the transaction response of the Transaction identified
-// by *RosettaTypes.TransactionIdentifier hash or index
+// by *RosettaTypes.TransactionIdentifier hash
 func (ec *Client) Transaction(
 	ctx context.Context,
 	blockIdentifier *RosettaTypes.BlockIdentifier,
@@ -288,7 +288,7 @@ func (ec *Client) Transaction(
 		}
 		return tx, nil
 	}
-	return nil, errors.New("unimplemented")
+	return nil, errors.New("transaction hash is required")
 }
 
 // Block returns a populated block at the *RosettaTypes.PartialBlockIdentifier.

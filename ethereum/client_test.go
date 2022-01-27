@@ -1447,6 +1447,20 @@ func TestBlock_FirstBlock(t *testing.T) {
 	mockGraphQL.AssertExpectations(t)
 }
 
+func jsonifyTransaction(b *RosettaTypes.Transaction) (*RosettaTypes.Transaction, error) {
+	bytes, err := json.Marshal(b)
+	if err != nil {
+		return nil, err
+	}
+
+	var tx RosettaTypes.Transaction
+	if err := json.Unmarshal(bytes, &tx); err != nil {
+		return nil, err
+	}
+
+	return &tx, nil
+}
+
 func jsonifyBlock(b *RosettaTypes.Block) (*RosettaTypes.Block, error) {
 	bytes, err := json.Marshal(b)
 	if err != nil {
@@ -1584,8 +1598,11 @@ func TestTransaction_Hash(t *testing.T) {
 			Hash: "0x9cc8e6a09ae9cbdb7da77515110a8e343a945df4269c53842dd26969d32c6cc4",
 		},
 	)
-	assert.Equal(t, correct.Transaction, resp)
 	assert.NoError(t, err)
+
+	jsonResp, err := jsonifyTransaction(resp)
+	assert.NoError(t, err)
+	assert.Equal(t, correct.Transaction, jsonResp)
 
 	mockJSONRPC.AssertExpectations(t)
 	mockGraphQL.AssertExpectations(t)
