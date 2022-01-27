@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"math/big"
 	"sort"
+	"strings"
 
 	"github.com/coinbase/rosetta-sdk-go/storage/modules"
 	"github.com/coinbase/rosetta-sdk-go/types"
@@ -36,8 +37,15 @@ type genesisAllocation struct {
 // for a particular genesis file.
 func GenerateBootstrapFile(genesisFile string, outputFile string) error {
 	var genesisAllocations genesis
-	if err := utils.LoadAndParse(genesisFile, &genesisAllocations); err != nil {
-		return fmt.Errorf("%w: could not load genesis file", err)
+
+	if strings.HasPrefix(genesisFile, "http://") || strings.HasPrefix(genesisFile, "https://") {
+		if err := utils.LoadAndParseURL(genesisFile, &genesisAllocations); err != nil {
+			return fmt.Errorf("%w: could not load genesis file", err)
+		}
+	} else {
+		if err := utils.LoadAndParse(genesisFile, &genesisAllocations); err != nil {
+			return fmt.Errorf("%w: could not load genesis file", err)
+		}
 	}
 
 	// Sort keys for deterministic genesis creation
@@ -49,7 +57,11 @@ func GenerateBootstrapFile(genesisFile string, outputFile string) error {
 			return fmt.Errorf("invalid address 0x%s", k)
 		}
 		keys = append(keys, checkAddr)
-		formattedAllocations[checkAddr] = genesisAllocations.Alloc[k].Balance
+		balance := genesisAllocations.Alloc[k].Balance
+		if balance == "" {
+			balance = "0"
+		}
+		formattedAllocations[checkAddr] = fmt.Sprintf("0x%s", balance)
 	}
 	sort.Strings(keys)
 
