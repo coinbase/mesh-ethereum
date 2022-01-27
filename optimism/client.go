@@ -301,9 +301,14 @@ func (ec *Client) getTransactionTraces(
 	}
 	reqs := make([]rpc.BatchElem, len(txs))
 	for i := range reqs {
+		type batchArgs struct {
+			DisableStack   bool `json:"disableStack"`
+			DisableStorage bool `json:"disableStorage"`
+			DisableMemory  bool `json:"disableMemory"`
+		}
 		reqs[i] = rpc.BatchElem{
 			Method: "debug_traceTransaction",
-			Args:   []interface{}{txs[i].tx.Hash().Hex()},
+			Args:   []interface{}{txs[i].tx.Hash().Hex(), batchArgs{DisableStack: true, DisableStorage: true, DisableMemory: true}},
 			Result: &traces[i],
 		}
 	}
