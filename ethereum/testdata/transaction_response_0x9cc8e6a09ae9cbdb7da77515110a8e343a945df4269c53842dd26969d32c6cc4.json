@@ -1,0 +1,115 @@
+{
+  "transaction": {
+    "transaction_identifier": {
+      "hash": "0x9cc8e6a09ae9cbdb7da77515110a8e343a945df4269c53842dd26969d32c6cc4"
+    },
+    "operations": [
+      {
+        "operation_identifier": {
+          "index": 0
+        },
+        "type": "FEE",
+        "status": "SUCCESS",
+        "account": {
+          "address": "0x687422eEA2cB73B5d3e242bA5456b782919AFc85"
+        },
+        "amount": {
+          "value": "-420000000000000",
+          "currency": {
+            "symbol": "ETH",
+            "decimals": 18
+          }
+        }
+      },
+      {
+        "operation_identifier": {
+          "index": 1
+        },
+        "related_operations": [
+          {
+            "index": 0
+          }
+        ],
+        "type": "FEE",
+        "status": "SUCCESS",
+        "account": {
+          "address": "0xfFC614eE978630D7fB0C06758DeB580c152154d3"
+        },
+        "amount": {
+          "value": "420000000000000",
+          "currency": {
+            "symbol": "ETH",
+            "decimals": 18
+          }
+        }
+      },
+      {
+        "operation_identifier": {
+          "index": 2
+        },
+        "type": "CALL",
+        "status": "SUCCESS",
+        "account": {
+          "address": "0x687422eEA2cB73B5d3e242bA5456b782919AFc85"
+        },
+        "amount": {
+          "value": "-1000000000000000000",
+          "currency": {
+            "symbol": "ETH",
+            "decimals": 18
+          }
+        }
+      },
+      {
+        "operation_identifier": {
+          "index": 3
+        },
+        "related_operations": [
+          {
+            "index": 2
+          }
+        ],
+        "type": "CALL",
+        "status": "SUCCESS",
+        "account": {
+          "address": "0xC662A694FdAa5406A8Ee2CA2E94890d58aB578D9"
+        },
+        "amount": {
+          "value": "1000000000000000000",
+          "currency": {
+            "symbol": "ETH",
+            "decimals": 18
+          }
+        }
+      }
+    ],
+    "metadata": {
+      "gas_limit": "0x4cb26",
+      "gas_price": "0x4a817c800",
+      "receipt": {
+        "blockHash": "0xc10a51a3898a85c7165a9d883acc9a68f139934d0cb91dfad4c7d3a7c1a1960d",
+        "blockNumber": "0xafc8",
+        "contractAddress": "0x0000000000000000000000000000000000000000",
+        "cumulativeGasUsed": "0x8b7c8",
+        "gasUsed": "0x5208",
+        "logs": [],
+        "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+        "root": "0x338b8ada6551b52f72804aa34c1846a9e101d8a52fcc13c10ba257efee769ddd",
+        "status": "0x0",
+        "transactionHash": "0x9cc8e6a09ae9cbdb7da77515110a8e343a945df4269c53842dd26969d32c6cc4",
+        "transactionIndex": "0x3"
+      },
+      "trace": {
+        "from": "0x687422eea2cb73b5d3e242ba5456b782919afc85",
+        "gas": "0x4791e",
+        "gasUsed": "0x0",
+        "input": "0x",
+        "output": "0x",
+        "time": "13.5µs",
+        "to": "0xc662a694fdaa5406a8ee2ca2e94890d58ab578d9",
+        "type": "CALL",
+        "value": "0xde0b6b3a7640000"
+      }
+    }
+  }
+}

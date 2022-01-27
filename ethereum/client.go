@@ -210,6 +210,8 @@ func toBlockNumArg(number *big.Int) string {
 	return hexutil.EncodeBig(number)
 }
 
+// Transaction returns the transaction response of the Transaction identified
+// by *RosettaTypes.TransactionIdentifier hash or index
 func (ec *Client) Transaction(
 	ctx context.Context,
 	blockIdentifier *RosettaTypes.BlockIdentifier,
@@ -232,7 +234,7 @@ func (ec *Client) Transaction(
 		}
 
 		var header *types.Header
-		if blockIdentifier.Hash != ""{
+		if blockIdentifier.Hash != "" {
 			header, err = ec.blockHeaderByHash(ctx, blockIdentifier.Hash)
 		} else {
 			header, err = ec.blockHeaderByNumber(ctx, big.NewInt(blockIdentifier.Index))
@@ -520,7 +522,6 @@ func (ec *Client) getTransactionTraces(
 	var call *Call
 	var raw json.RawMessage
 	err := ec.c.CallContext(ctx, &raw, "debug_traceTransaction", transactionHash, ec.tc)
-
 	if err != nil {
 		return nil, nil, err
 	}
@@ -1188,7 +1189,7 @@ func (ec *Client) populateTransactions(
 func (ec *Client) populateTransaction(
 	tx *loadedTransaction,
 ) (*RosettaTypes.Transaction, error) {
-	ops := []*RosettaTypes.Operation{}
+	var ops []*RosettaTypes.Operation
 
 	// Compute fee operations
 	feeOps := feeOps(tx)
