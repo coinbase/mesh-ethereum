@@ -16,6 +16,7 @@ package services
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/coinbase/rosetta-ethereum/configuration"
@@ -41,8 +42,8 @@ func TestBlockService_Offline(t *testing.T) {
 
 	blockTransaction, err := servicer.BlockTransaction(ctx, &types.BlockTransactionRequest{})
 	assert.Nil(t, blockTransaction)
-	assert.Equal(t, ErrUnimplemented.Code, err.Code)
-	assert.Equal(t, ErrUnimplemented.Message, err.Message)
+	assert.Equal(t, ErrUnavailableOffline.Code, err.Code)
+	assert.Equal(t, ErrUnavailableOffline.Message, err.Message)
 
 	mockClient.AssertExpectations(t)
 }
@@ -104,4 +105,62 @@ func TestBlockService_Online(t *testing.T) {
 	})
 
 	mockClient.AssertExpectations(t)
+}
+
+func TestBlockTransactionService_Offline(t *testing.T) {
+	cfg := &configuration.Configuration{
+		Mode: configuration.Online,
+	}
+	mockClient := &mocks.Client{}
+	servicer := NewBlockAPIService(cfg, mockClient)
+	ctx := context.Background()
+
+	blockIdentifier := &types.BlockIdentifier{Hash: "xyz"}
+	transactionIdentifier := &types.TransactionIdentifier{
+		Hash: "transaction xyz",
+	}
+
+	blockTransaction := &types.Transaction{
+		TransactionIdentifier: transactionIdentifier,
+	}
+
+	blockTransactionResponse := &types.BlockTransactionResponse{
+		Transaction: blockTransaction,
+	}
+
+	t.Run("Transaction returns error", func(t *testing.T) {
+		mockClient.On(
+			"Transaction",
+			ctx,
+			blockIdentifier,
+			transactionIdentifier,
+		).Return(
+			nil,
+			errors.New("some err"),
+		).Once()
+		b, err := servicer.BlockTransaction(ctx, &types.BlockTransactionRequest{
+			BlockIdentifier:       blockIdentifier,
+			TransactionIdentifier: transactionIdentifier,
+		})
+		assert.NotNil(t, err)
+		assert.Nil(t, b)
+	})
+
+	t.Run("Transaction returns a valid transaction", func(t *testing.T) {
+		mockClient.On(
+			"Transaction",
+			ctx,
+			blockIdentifier,
+			transactionIdentifier,
+		).Return(
+			blockTransaction,
+			nil,
+		).Once()
+		b, err := servicer.BlockTransaction(ctx, &types.BlockTransactionRequest{
+			BlockIdentifier:       blockIdentifier,
+			TransactionIdentifier: transactionIdentifier,
+		})
+		assert.Nil(t, err)
+		assert.Equal(t, blockTransactionResponse, b)
+	})
 }
