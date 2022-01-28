@@ -217,78 +217,79 @@ func (ec *Client) Transaction(
 	blockIdentifier *RosettaTypes.BlockIdentifier,
 	transactionIdentifier *RosettaTypes.TransactionIdentifier,
 ) (*RosettaTypes.Transaction, error) {
-	if transactionIdentifier.Hash != "" {
-		var raw json.RawMessage
-		err := ec.c.CallContext(ctx, &raw, "eth_getTransactionByHash", transactionIdentifier.Hash)
-		if err != nil {
-			return nil, fmt.Errorf("%w: transaction fetch failed", err)
-		} else if len(raw) == 0 {
-			return nil, ethereum.NotFound
-		}
-
-		// Decode transaction
-		var body rpcTransaction
-
-		if err := json.Unmarshal(raw, &body); err != nil {
-			return nil, err
-		}
-
-		var header *types.Header
-		if blockIdentifier.Hash != "" {
-			header, err = ec.blockHeaderByHash(ctx, blockIdentifier.Hash)
-		} else {
-			header, err = ec.blockHeaderByNumber(ctx, big.NewInt(blockIdentifier.Index))
-		}
-
-		if err != nil {
-			return nil, fmt.Errorf("%w: could not get block header for %x", err, blockIdentifier.Hash)
-		}
-
-		receipt, err := ec.transactionReceipt(ctx, body.tx.Hash())
-		if receipt.BlockHash != *body.BlockHash {
-			return nil, fmt.Errorf(
-				"%w: expected block hash %s for transaction but got %s",
-				ErrBlockOrphaned,
-				body.BlockHash.Hex(),
-				receipt.BlockHash.Hex(),
-			)
-		}
-		if err != nil {
-			return nil, fmt.Errorf("%w: could not get receipt for %x", err, body.tx.Hash())
-		}
-
-		var traces *Call
-		var rawTraces json.RawMessage
-		var addTraces bool
-		if header.Number.Int64() != GenesisBlockIndex { // not possible to get traces at genesis
-			addTraces = true
-			traces, rawTraces, err = ec.getTransactionTraces(ctx, body.tx.Hash())
-			if err != nil {
-				return nil, fmt.Errorf("%w: could not get traces for %x", err, body.tx.Hash())
-			}
-		}
-
-		gasUsedBig := new(big.Int).SetUint64(receipt.GasUsed)
-		feeAmount := gasUsedBig.Mul(gasUsedBig, body.tx.GasPrice())
-
-		loadedTxs := body.LoadedTransaction()
-		loadedTxs.Transaction = body.tx
-		loadedTxs.FeeAmount = feeAmount
-		loadedTxs.Miner = MustChecksum(header.Coinbase.Hex())
-		loadedTxs.Receipt = receipt
-
-		if addTraces {
-			loadedTxs.Trace = traces
-			loadedTxs.RawTrace = rawTraces
-		}
-
-		tx, err := ec.populateTransaction(loadedTxs)
-		if err != nil {
-			return nil, fmt.Errorf("%w: cannot parse %s", err, loadedTxs.Transaction.Hash().Hex())
-		}
-		return tx, nil
+	if transactionIdentifier.Hash == "" {
+		return nil, errors.New("transaction hash is required")
 	}
-	return nil, errors.New("transaction hash is required")
+
+	var raw json.RawMessage
+		err := ec.c.CallContext(ctx, &raw, "eth_getTransactionByHash", transactionIdentifier.Hash)
+	if err != nil {
+		return nil, fmt.Errorf("%w: transaction fetch failed", err)
+	} else if len(raw) == 0 {
+		return nil, ethereum.NotFound
+	}
+
+	// Decode transaction
+	var body rpcTransaction
+
+	if err := json.Unmarshal(raw, &body); err != nil {
+		return nil, err
+	}
+
+	var header *types.Header
+	if blockIdentifier.Hash != "" {
+		header, err = ec.blockHeaderByHash(ctx, blockIdentifier.Hash)
+	} else {
+		header, err = ec.blockHeaderByNumber(ctx, big.NewInt(blockIdentifier.Index))
+	}
+
+	if err != nil {
+		return nil, fmt.Errorf("%w: could not get block header for %x", err, blockIdentifier.Hash)
+	}
+
+	receipt, err := ec.transactionReceipt(ctx, body.tx.Hash())
+	if receipt.BlockHash != *body.BlockHash {
+		return nil, fmt.Errorf(
+			"%w: expected block hash %s for transaction but got %s",
+			ErrBlockOrphaned,
+			body.BlockHash.Hex(),
+			receipt.BlockHash.Hex(),
+		)
+	}
+	if err != nil {
+		return nil, fmt.Errorf("%w: could not get receipt for %x", err, body.tx.Hash())
+	}
+
+	var traces *Call
+	var rawTraces json.RawMessage
+	var addTraces bool
+	if header.Number.Int64() != GenesisBlockIndex { // not possible to get traces at genesis
+		addTraces = true
+		traces, rawTraces, err = ec.getTransactionTraces(ctx, body.tx.Hash())
+		if err != nil {
+			return nil, fmt.Errorf("%w: could not get traces for %x", err, body.tx.Hash())
+		}
+	}
+
+	gasUsedBig := new(big.Int).SetUint64(receipt.GasUsed)
+	feeAmount := gasUsedBig.Mul(gasUsedBig, body.tx.GasPrice())
+
+	loadedTxs := body.LoadedTransaction()
+	loadedTxs.Transaction = body.tx
+	loadedTxs.FeeAmount = feeAmount
+	loadedTxs.Miner = MustChecksum(header.Coinbase.Hex())
+	loadedTxs.Receipt = receipt
+
+	if addTraces {
+		loadedTxs.Trace = traces
+		loadedTxs.RawTrace = rawTraces
+	}
+
+	tx, err := ec.populateTransaction(loadedTxs)
+	if err != nil {
+		return nil, fmt.Errorf("%w: cannot parse %s", err, loadedTxs.Transaction.Hash().Hex())
+	}
+	return tx, nil
 }
 
 // Block returns a populated block at the *RosettaTypes.PartialBlockIdentifier.

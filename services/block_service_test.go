@@ -117,7 +117,7 @@ func TestBlockTransactionService_Offline(t *testing.T) {
 
 	blockIdentifier := &types.BlockIdentifier{Hash: "xyz"}
 	transactionIdentifier := &types.TransactionIdentifier{
-		Hash:  "transaction xyz",
+		Hash: "transaction xyz",
 	}
 
 	blockTransaction := &types.Transaction{
@@ -127,76 +127,6 @@ func TestBlockTransactionService_Offline(t *testing.T) {
 	blockTransactionResponse := &types.BlockTransactionResponse{
 		Transaction: blockTransaction,
 	}
-
-	t.Run("nil block identifier", func(t *testing.T) {
-		mockClient.On(
-			"Transaction",
-			ctx,
-			(*types.BlockIdentifier)(nil),
-			types.TransactionIdentifier{Hash: "xyx"},
-		).Return(
-			blockTransactionResponse,
-			nil,
-		).Once()
-		b, err := servicer.BlockTransaction(ctx, &types.BlockTransactionRequest{
-			TransactionIdentifier: &types.TransactionIdentifier{},
-		})
-		assert.NotNil(t, err)
-		assert.Nil(t, b)
-	})
-
-	t.Run("nil transaction identifier", func(t *testing.T) {
-		mockClient.On(
-			"Transaction",
-			ctx,
-			(*types.BlockIdentifier)(nil),
-			types.TransactionIdentifier{Hash: "xyx"},
-		).Return(
-			blockTransactionResponse,
-			nil,
-		).Once()
-		b, err := servicer.BlockTransaction(ctx, &types.BlockTransactionRequest{
-			BlockIdentifier: &types.BlockIdentifier{},
-		})
-		assert.NotNil(t, err)
-		assert.Nil(t, b)
-	})
-
-	t.Run("no block hash or index", func(t *testing.T) {
-		mockClient.On(
-			"Transaction",
-			ctx,
-			(*types.BlockIdentifier)(nil),
-			types.TransactionIdentifier{Hash: "xyx"},
-		).Return(
-			blockTransactionResponse,
-			nil,
-		).Once()
-		b, err := servicer.BlockTransaction(ctx, &types.BlockTransactionRequest{
-			BlockIdentifier: &types.BlockIdentifier{},
-			TransactionIdentifier: &types.TransactionIdentifier{},
-		})
-		assert.NotNil(t, err)
-		assert.Nil(t, b)
-	})
-
-	t.Run("no transaction hash", func(t *testing.T) {
-		mockClient.On(
-			"Transaction",
-			ctx,
-			(*types.BlockIdentifier)(nil),
-			types.TransactionIdentifier{Hash: "xyx"},
-		).Return(
-			blockTransactionResponse,
-			nil,
-		).Once()
-		b, err := servicer.BlockTransaction(ctx, &types.BlockTransactionRequest{
-			BlockIdentifier: &types.BlockIdentifier{ Hash: "xyz"},
-			TransactionIdentifier: &types.TransactionIdentifier{},
-		})
-		assert.NotNil(t, err)
-		assert.Nil(t, b)
-	})
 
 	t.Run("Transaction returns error", func(t *testing.T) {
 		mockClient.On(
@@ -209,7 +139,7 @@ func TestBlockTransactionService_Offline(t *testing.T) {
 			errors.New("some err"),
 		).Once()
 		b, err := servicer.BlockTransaction(ctx, &types.BlockTransactionRequest{
-			BlockIdentifier: blockIdentifier,
+			BlockIdentifier:       blockIdentifier,
 			TransactionIdentifier: transactionIdentifier,
 		})
 		assert.NotNil(t, err)
@@ -227,7 +157,7 @@ func TestBlockTransactionService_Offline(t *testing.T) {
 			nil,
 		).Once()
 		b, err := servicer.BlockTransaction(ctx, &types.BlockTransactionRequest{
-			BlockIdentifier: blockIdentifier,
+			BlockIdentifier:       blockIdentifier,
 			TransactionIdentifier: transactionIdentifier,
 		})
 		assert.Nil(t, err)
