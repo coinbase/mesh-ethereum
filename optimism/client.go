@@ -911,7 +911,31 @@ func (ec *Client) populateTransactions(
 	// 	block.Uncles(),
 	// )
 
+	const GAS_ORACLE_CONTRACT = "0x420000000000000000000000000000000000000f"
+	const L2_CROSS_DOMAIN_MESSAGER_CONTRACT = "0x4200000000000000000000000000000000000007"
+
+	// TODO(inphi): load the gasOracleOwner from config (also, need to figure
+	// out how to update owner updates to CB)
+	var gasOracleOwner = common.HexToAddress("0x7107142636C85c549690b1Aca12Bdb8052d26Ae6")
+	var gasOracleAddr = common.HexToAddress(GAS_ORACLE_CONTRACT)
 	for i, tx := range loadedTransactions {
+		if tx.From != nil && tx.Transaction != nil && tx.Transaction.To() != nil {
+			from, to := tx.From.Hex(), tx.Transaction.To().Hex()
+
+			// Skip L1 -> L2 messages
+			if from == "0x0000000000000000000000000000000000000000" && to == L2_CROSS_DOMAIN_MESSAGER_CONTRACT {
+				fmt.Printf("skipping relay %#v\n", tx)
+				tx.FeeAmount.SetUint64(0)
+				//continue
+			} else if from == gasOracleOwner.Hex() && to == gasOracleAddr.Hex() {
+				// HACK: The sequencer doesn't charge the owner of the gpo.
+				// Set the fee mount to zero to not affect gas oracle owner balances
+				tx.FeeAmount.SetUint64(0)
+			} else if from == "0x0000000000000000000000000000000000000000" {
+				panic(fmt.Sprintf("unhandled tx: %s", to))
+			}
+		}
+
 		transaction, err := ec.populateTransaction(
 			tx,
 		)
