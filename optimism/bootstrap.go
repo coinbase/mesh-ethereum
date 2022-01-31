@@ -15,8 +15,10 @@
 package optimism
 
 import (
+	"encoding/json"
 	"fmt"
 	"math/big"
+	"net/http"
 	"sort"
 	"strings"
 
@@ -33,13 +35,35 @@ type genesisAllocation struct {
 	Balance string `json:"balance"`
 }
 
+func LoadAndParseURL(url string, output interface{}) error {
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return err
+	}
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	// To prevent silent erroring, we explicitly
+	// reject any unknown fields.
+	dec := json.NewDecoder(resp.Body)
+
+	if err := dec.Decode(&output); err != nil {
+		return fmt.Errorf("%w: unable to unmarshal", err)
+	}
+
+	return nil
+}
+
 // GenerateBootstrapFile creates the bootstrap balances file
 // for a particular genesis file.
 func GenerateBootstrapFile(genesisFile string, outputFile string) error {
 	var genesisAllocations genesis
 
 	if strings.HasPrefix(genesisFile, "http://") || strings.HasPrefix(genesisFile, "https://") {
-		if err := utils.LoadAndParseURL(genesisFile, &genesisAllocations); err != nil {
+		if err := LoadAndParseURL(genesisFile, &genesisAllocations); err != nil {
 			return fmt.Errorf("%w: could not load genesis file", err)
 		}
 	} else {
