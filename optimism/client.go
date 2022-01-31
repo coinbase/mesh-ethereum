@@ -21,6 +21,7 @@ import (
 	"log"
 	"math/big"
 	"net/http"
+	"strings"
 	"time"
 
 	RosettaTypes "github.com/coinbase/rosetta-sdk-go/types"
@@ -380,6 +381,7 @@ type Call struct {
 	To           common.Address `json:"to"`
 	Value        *big.Int       `json:"value"`
 	GasUsed      *big.Int       `json:"gasUsed"`
+	Input        string         `json:"input"`
 	Revert       bool
 	ErrorMessage string  `json:"error"`
 	Calls        []*Call `json:"calls"`
@@ -391,6 +393,7 @@ type flatCall struct {
 	To           common.Address `json:"to"`
 	Value        *big.Int       `json:"value"`
 	GasUsed      *big.Int       `json:"gasUsed"`
+	Input        string         `json:"input"`
 	Revert       bool
 	ErrorMessage string `json:"error"`
 }
@@ -402,6 +405,7 @@ func (t *Call) flatten() *flatCall {
 		To:           t.To,
 		Value:        t.Value,
 		GasUsed:      t.GasUsed,
+		Input:        t.Input,
 		Revert:       t.Revert,
 		ErrorMessage: t.ErrorMessage,
 	}
@@ -415,6 +419,7 @@ func (t *Call) UnmarshalJSON(input []byte) error {
 		To           common.Address `json:"to"`
 		Value        *hexutil.Big   `json:"value"`
 		GasUsed      *hexutil.Big   `json:"gasUsed"`
+		Input        string         `json:"input"`
 		Revert       bool
 		ErrorMessage string  `json:"error"`
 		Calls        []*Call `json:"calls"`
@@ -437,6 +442,7 @@ func (t *Call) UnmarshalJSON(input []byte) error {
 	} else {
 		t.GasUsed = new(big.Int)
 	}
+	t.Input = dec.Input
 	if dec.ErrorMessage != "" {
 		// Any error surfaced by the decoder means that the transaction
 		// has reverted.
@@ -503,6 +509,35 @@ func traceOps(calls []*flatCall, startIndex int) []*RosettaTypes.Operation { // 
 			shouldAdd = false
 		}
 
+		l2Withdraw, l2WithdrawAddr := func() (*big.Int, common.Address) {
+			const BURN_ADDRESS = "0xdeaddeaddeaddeaddeaddeaddeaddeaddead0000"
+			var burnAddress = common.HexToAddress(BURN_ADDRESS)
+			if trace.Type != CallOpType {
+				return nil, common.Address{}
+			}
+			if trace.To.Hex() != burnAddress.Hex() {
+				return nil, common.Address{}
+			}
+			if len(trace.Input) != 138 { // 0x | 4-byte selector | 32-byte padded address | 32-byte uint256 amount
+				return nil, common.Address{}
+			}
+			// function selector for burn(address,uint256)
+			if !strings.HasPrefix(trace.Input, "0x9dc29fac") {
+				return nil, common.Address{}
+			}
+
+			burnedFrom := trace.Input[10:74]
+			burnedFromAddr := common.HexToAddress(burnedFrom)
+
+			burnedAmtHex := fmt.Sprintf("0x%s", strings.TrimLeft(trace.Input[74:], "0"))
+			burnedAmt, err := hexutil.DecodeBig(burnedAmtHex)
+			if err != nil {
+				return nil, common.Address{}
+			}
+
+			return burnedAmt, burnedFromAddr
+		}()
+
 		//fmt.Printf("TRACE TYPE: %v\n", trace.Type)
 
 		// Checksum addresses
@@ -535,6 +570,24 @@ func traceOps(calls []*flatCall, startIndex int) []*RosettaTypes.Operation { // 
 			}
 
 			ops = append(ops, fromOp)
+		}
+		if l2Withdraw != nil {
+			burnOp := &RosettaTypes.Operation{
+				OperationIdentifier: &RosettaTypes.OperationIdentifier{
+					Index: int64(len(ops) + startIndex),
+				},
+				Type:   trace.Type,
+				Status: RosettaTypes.String(opStatus),
+				Account: &RosettaTypes.AccountIdentifier{
+					Address: l2WithdrawAddr.String(),
+				},
+				Amount: &RosettaTypes.Amount{
+					Value:    new(big.Int).Neg(l2Withdraw).String(),
+					Currency: Currency,
+				},
+				Metadata: metadata,
+			}
+			ops = append(ops, burnOp)
 		}
 
 		// Add to destroyed accounts if SELFDESTRUCT
@@ -931,7 +984,6 @@ func (ec *Client) populateTransactions(
 			if from == "0x0000000000000000000000000000000000000000" && to == L2_CROSS_DOMAIN_MESSAGER_CONTRACT {
 				fmt.Printf("skipping relay %#v\n", tx)
 				tx.FeeAmount.SetUint64(0)
-				//continue
 			} else if from == gasOracleOwner.Hex() && to == gasOracleAddr.Hex() {
 				// HACK: The sequencer doesn't charge the owner of the gpo.
 				// Set the fee mount to zero to not affect gas oracle owner balances
