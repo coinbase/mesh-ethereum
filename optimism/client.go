@@ -270,6 +270,7 @@ func (ec *Client) getBlock(
 		gasUsedBig := new(big.Int).SetUint64(receipt.GasUsed)
 		l2feeAmount := gasUsedBig.Mul(gasUsedBig, txs[i].GasPrice())
 		feeAmount := l2feeAmount.Add(l2feeAmount, receipts[i].L1Fee)
+		//fmt.Printf("Fee is %v for from=%v at block=%v\n", feeAmount, tx.From.String(), *tx.BlockNumber)
 
 		loadedTxs[i] = tx.LoadedTransaction()
 		loadedTxs[i].Transaction = txs[i]
@@ -301,14 +302,9 @@ func (ec *Client) getTransactionTraces(
 	}
 	reqs := make([]rpc.BatchElem, len(txs))
 	for i := range reqs {
-		type batchArgs struct {
-			DisableStack   bool `json:"disableStack"`
-			DisableStorage bool `json:"disableStorage"`
-			DisableMemory  bool `json:"disableMemory"`
-		}
 		reqs[i] = rpc.BatchElem{
 			Method: "debug_traceTransaction",
-			Args:   []interface{}{txs[i].tx.Hash().Hex(), batchArgs{DisableStack: true, DisableStorage: true, DisableMemory: true}},
+			Args:   []interface{}{txs[i].tx.Hash().Hex(), ec.tc},
 			Result: &traces[i],
 		}
 	}
@@ -483,6 +479,8 @@ func traceOps(calls []*flatCall, startIndex int) []*RosettaTypes.Operation { // 
 
 	destroyedAccounts := map[string]*big.Int{}
 	for _, trace := range calls {
+		//fmt.Printf("TRACEOPS: type=%v to=%v value=%v\n", trace.Type, trace.To.String(), trace.Value)
+
 		// Handle partial transaction success
 		metadata := map[string]interface{}{}
 		opStatus := SuccessStatus
@@ -504,6 +502,8 @@ func traceOps(calls []*flatCall, startIndex int) []*RosettaTypes.Operation { // 
 		if zeroValue && CallType(trace.Type) {
 			shouldAdd = false
 		}
+
+		//fmt.Printf("TRACE TYPE: %v\n", trace.Type)
 
 		// Checksum addresses
 		from := MustChecksum(trace.From.String())
@@ -672,6 +672,8 @@ type loadedTransaction struct {
 }
 
 func feeOps(tx *loadedTransaction) []*RosettaTypes.Operation {
+	//fmt.Printf("FEEOPS: %s, %v\n", tx.From.String(), tx.FeeAmount.String())
+
 	return []*RosettaTypes.Operation{
 		{
 			OperationIdentifier: &RosettaTypes.OperationIdentifier{
@@ -688,25 +690,28 @@ func feeOps(tx *loadedTransaction) []*RosettaTypes.Operation {
 			},
 		},
 
-		{
-			OperationIdentifier: &RosettaTypes.OperationIdentifier{
-				Index: 1,
-			},
-			RelatedOperations: []*RosettaTypes.OperationIdentifier{
-				{
-					Index: 0,
+		// TODO: No miner fees on Optimism?
+		/*
+			{
+				OperationIdentifier: &RosettaTypes.OperationIdentifier{
+					Index: 1,
+				},
+				RelatedOperations: []*RosettaTypes.OperationIdentifier{
+					{
+						Index: 0,
+					},
+				},
+				Type:   FeeOpType,
+				Status: RosettaTypes.String(SuccessStatus),
+				Account: &RosettaTypes.AccountIdentifier{
+					Address: MustChecksum(tx.Miner),
+				},
+				Amount: &RosettaTypes.Amount{
+					Value:    tx.FeeAmount.String(),
+					Currency: Currency,
 				},
 			},
-			Type:   FeeOpType,
-			Status: RosettaTypes.String(SuccessStatus),
-			Account: &RosettaTypes.AccountIdentifier{
-				Address: MustChecksum(tx.Miner),
-			},
-			Amount: &RosettaTypes.Amount{
-				Value:    tx.FeeAmount.String(),
-				Currency: Currency,
-			},
-		},
+		*/
 	}
 }
 
@@ -911,7 +916,31 @@ func (ec *Client) populateTransactions(
 	// 	block.Uncles(),
 	// )
 
+	const GAS_ORACLE_CONTRACT = "0x420000000000000000000000000000000000000f"
+	const L2_CROSS_DOMAIN_MESSAGER_CONTRACT = "0x4200000000000000000000000000000000000007"
+
+	// TODO(inphi): load the gasOracleOwner from config (also, need to figure
+	// out how to update owner updates to CB)
+	var gasOracleOwner = common.HexToAddress("0x7107142636C85c549690b1Aca12Bdb8052d26Ae6")
+	var gasOracleAddr = common.HexToAddress(GAS_ORACLE_CONTRACT)
 	for i, tx := range loadedTransactions {
+		if tx.From != nil && tx.Transaction != nil && tx.Transaction.To() != nil {
+			from, to := tx.From.Hex(), tx.Transaction.To().Hex()
+
+			// Skip L1 -> L2 messages
+			if from == "0x0000000000000000000000000000000000000000" && to == L2_CROSS_DOMAIN_MESSAGER_CONTRACT {
+				fmt.Printf("skipping relay %#v\n", tx)
+				tx.FeeAmount.SetUint64(0)
+				//continue
+			} else if from == gasOracleOwner.Hex() && to == gasOracleAddr.Hex() {
+				// HACK: The sequencer doesn't charge the owner of the gpo.
+				// Set the fee mount to zero to not affect gas oracle owner balances
+				tx.FeeAmount.SetUint64(0)
+			} else if from == "0x0000000000000000000000000000000000000000" {
+				panic(fmt.Sprintf("unhandled tx: %s", to))
+			}
+		}
+
 		transaction, err := ec.populateTransaction(
 			tx,
 		)
@@ -936,10 +965,10 @@ func (ec *Client) populateTransaction(
 
 	// TODO: figure out why trace ops look different???
 	// Compute trace operations
-	// traces := flattenTraces(tx.Trace, []*flatCall{})
+	traces := flattenTraces(tx.Trace, []*flatCall{})
 
-	// traceOps := traceOps(traces, len(ops))
-	// ops = append(ops, traceOps...)
+	traceOps := traceOps(traces, len(ops))
+	ops = append(ops, traceOps...)
 
 	// Marshal receipt and trace data
 	// TODO: replace with marshalJSONMap (used in `services`)
