@@ -270,6 +270,7 @@ func (ec *Client) getBlock(
 		gasUsedBig := new(big.Int).SetUint64(receipt.GasUsed)
 		l2feeAmount := gasUsedBig.Mul(gasUsedBig, txs[i].GasPrice())
 		feeAmount := l2feeAmount.Add(l2feeAmount, receipts[i].L1Fee)
+		//fmt.Printf("Fee is %v for from=%v at block=%v\n", feeAmount, tx.From.String(), *tx.BlockNumber)
 
 		loadedTxs[i] = tx.LoadedTransaction()
 		loadedTxs[i].Transaction = txs[i]
@@ -501,6 +502,8 @@ func traceOps(calls []*flatCall, startIndex int) []*RosettaTypes.Operation { // 
 		if zeroValue && CallType(trace.Type) {
 			shouldAdd = false
 		}
+
+		//fmt.Printf("TRACE TYPE: %v\n", trace.Type)
 
 		// Checksum addresses
 		from := MustChecksum(trace.From.String())
