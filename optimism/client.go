@@ -301,14 +301,9 @@ func (ec *Client) getTransactionTraces(
 	}
 	reqs := make([]rpc.BatchElem, len(txs))
 	for i := range reqs {
-		type batchArgs struct {
-			DisableStack   bool `json:"disableStack"`
-			DisableStorage bool `json:"disableStorage"`
-			DisableMemory  bool `json:"disableMemory"`
-		}
 		reqs[i] = rpc.BatchElem{
 			Method: "debug_traceTransaction",
-			Args:   []interface{}{txs[i].tx.Hash().Hex(), batchArgs{DisableStack: true, DisableStorage: true, DisableMemory: true}},
+			Args:   []interface{}{txs[i].tx.Hash().Hex(), ec.tc},
 			Result: &traces[i],
 		}
 	}
@@ -483,6 +478,8 @@ func traceOps(calls []*flatCall, startIndex int) []*RosettaTypes.Operation { // 
 
 	destroyedAccounts := map[string]*big.Int{}
 	for _, trace := range calls {
+		//fmt.Printf("TRACEOPS: type=%v to=%v value=%v\n", trace.Type, trace.To.String(), trace.Value)
+
 		// Handle partial transaction success
 		metadata := map[string]interface{}{}
 		opStatus := SuccessStatus
@@ -672,6 +669,8 @@ type loadedTransaction struct {
 }
 
 func feeOps(tx *loadedTransaction) []*RosettaTypes.Operation {
+	//fmt.Printf("FEEOPS: %s, %v\n", tx.From.String(), tx.FeeAmount.String())
+
 	return []*RosettaTypes.Operation{
 		{
 			OperationIdentifier: &RosettaTypes.OperationIdentifier{
@@ -688,25 +687,28 @@ func feeOps(tx *loadedTransaction) []*RosettaTypes.Operation {
 			},
 		},
 
-		{
-			OperationIdentifier: &RosettaTypes.OperationIdentifier{
-				Index: 1,
-			},
-			RelatedOperations: []*RosettaTypes.OperationIdentifier{
-				{
-					Index: 0,
+		// TODO: No miner fees on Optimism?
+		/*
+			{
+				OperationIdentifier: &RosettaTypes.OperationIdentifier{
+					Index: 1,
+				},
+				RelatedOperations: []*RosettaTypes.OperationIdentifier{
+					{
+						Index: 0,
+					},
+				},
+				Type:   FeeOpType,
+				Status: RosettaTypes.String(SuccessStatus),
+				Account: &RosettaTypes.AccountIdentifier{
+					Address: MustChecksum(tx.Miner),
+				},
+				Amount: &RosettaTypes.Amount{
+					Value:    tx.FeeAmount.String(),
+					Currency: Currency,
 				},
 			},
-			Type:   FeeOpType,
-			Status: RosettaTypes.String(SuccessStatus),
-			Account: &RosettaTypes.AccountIdentifier{
-				Address: MustChecksum(tx.Miner),
-			},
-			Amount: &RosettaTypes.Amount{
-				Value:    tx.FeeAmount.String(),
-				Currency: Currency,
-			},
-		},
+		*/
 	}
 }
 
@@ -960,10 +962,10 @@ func (ec *Client) populateTransaction(
 
 	// TODO: figure out why trace ops look different???
 	// Compute trace operations
-	// traces := flattenTraces(tx.Trace, []*flatCall{})
+	traces := flattenTraces(tx.Trace, []*flatCall{})
 
-	// traceOps := traceOps(traces, len(ops))
-	// ops = append(ops, traceOps...)
+	traceOps := traceOps(traces, len(ops))
+	ops = append(ops, traceOps...)
 
 	// Marshal receipt and trace data
 	// TODO: replace with marshalJSONMap (used in `services`)
