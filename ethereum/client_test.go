@@ -2748,7 +2748,7 @@ func TestGetMempool(t *testing.T) {
 		nil,
 	).Run(
 		func(args mock.Arguments) {
-			r, ok := args.Get(1).(*TxPoolContentResponse)
+			r, ok := args.Get(1).(*txPoolContentResponse)
 			assert.True(t, ok)
 
 			file, err := ioutil.ReadFile("testdata/txpool_content.json")

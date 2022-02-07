@@ -222,7 +222,7 @@ func (ec *Client) Transaction(
 	}
 
 	var raw json.RawMessage
-		err := ec.c.CallContext(ctx, &raw, "eth_getTransactionByHash", transactionIdentifier.Hash)
+	err := ec.c.CallContext(ctx, &raw, "eth_getTransactionByHash", transactionIdentifier.Hash)
 	if err != nil {
 		return nil, fmt.Errorf("%w: transaction fetch failed", err)
 	} else if len(raw) == 0 {
@@ -1558,38 +1558,20 @@ func (ec *Client) Call(
 	return nil, fmt.Errorf("%w: %s", ErrCallMethodInvalid, request.Method)
 }
 
-// TxPoolContentResponse represents the response for a call to
+// txPoolContentResponse represents the response for a call to
 // geth node on the "txpool_content" method.
-type TxPoolContentResponse struct {
+type txPoolContentResponse struct {
 	Pending txPool `json:"pending"`
 	Queued  txPool `json:"queued"`
 }
 
 type txPool map[string]txPoolInner
 
-type txPoolInner map[string]txPoolTxInfo
-
-type txPoolTxInfo struct {
-	BlockHash        *string `json:"blockHash"`
-	BlockNumber      *string `json:"blockNumber"`
-	From             string  `json:"from"`
-	Gas              string  `json:"gas"`
-	GasPrice         string  `json:"gasPrice"`
-	Hash             string  `json:"hash"`
-	Input            string  `json:"input"`
-	Nonce            string  `json:"nonce"`
-	To               string  `json:"to"`
-	TransactionIndex int64   `json:"transactionIndex"`
-	Value            string  `json:"value"`
-	Type             string  `json:"type"`
-	V                string  `json:"v"`
-	R                string  `json:"r"`
-	S                string  `json:"s"`
-}
+type txPoolInner map[string]rpcTransaction
 
 // GetMempool get and returns all the transactions on Ethereum TxPool (pending and queued).
 func (ec *Client) GetMempool(ctx context.Context) (*RosettaTypes.MempoolResponse, error) {
-	var response TxPoolContentResponse
+	var response txPoolContentResponse
 	if err := ec.c.CallContext(ctx, &response, "txpool_content"); err != nil {
 		return nil, err
 	}
@@ -1599,7 +1581,7 @@ func (ec *Client) GetMempool(ctx context.Context) (*RosettaTypes.MempoolResponse
 	for _, inner := range response.Pending {
 		for _, info := range inner {
 			identifiers = append(identifiers, &RosettaTypes.TransactionIdentifier{
-				Hash: info.Hash,
+				Hash: info.tx.Hash().String(),
 			})
 		}
 	}
@@ -1607,7 +1589,7 @@ func (ec *Client) GetMempool(ctx context.Context) (*RosettaTypes.MempoolResponse
 	for _, inner := range response.Queued {
 		for _, info := range inner {
 			identifiers = append(identifiers, &RosettaTypes.TransactionIdentifier{
-				Hash: info.Hash,
+				Hash: info.tx.Hash().String(),
 			})
 		}
 	}
