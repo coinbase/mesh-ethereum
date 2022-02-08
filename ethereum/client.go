@@ -271,23 +271,25 @@ func (ec *Client) Transaction(
 		}
 	}
 
-	gasUsedBig := new(big.Int).SetUint64(receipt.GasUsed)
-	feeAmount := gasUsedBig.Mul(gasUsedBig, body.tx.GasPrice())
-
-	loadedTxs := body.LoadedTransaction()
-	loadedTxs.Transaction = body.tx
-	loadedTxs.FeeAmount = feeAmount
-	loadedTxs.Miner = MustChecksum(header.Coinbase.Hex())
-	loadedTxs.Receipt = receipt
+	loadedTx := body.LoadedTransaction()
+	loadedTx.Transaction = body.tx
+	feeAmount, feeBurned, err := calculateGas(body.tx, receipt, *header)
+	if err != nil {
+		return nil, err
+	}
+	loadedTx.FeeAmount = feeAmount
+	loadedTx.FeeBurned = feeBurned
+	loadedTx.Miner = MustChecksum(header.Coinbase.Hex())
+	loadedTx.Receipt = receipt
 
 	if addTraces {
-		loadedTxs.Trace = traces
-		loadedTxs.RawTrace = rawTraces
+		loadedTx.Trace = traces
+		loadedTx.RawTrace = rawTraces
 	}
 
-	tx, err := ec.populateTransaction(loadedTxs)
+	tx, err := ec.populateTransaction(loadedTx)
 	if err != nil {
-		return nil, fmt.Errorf("%w: cannot parse %s", err, loadedTxs.Transaction.Hash().Hex())
+		return nil, fmt.Errorf("%w: cannot parse %s", err, loadedTx.Transaction.Hash().Hex())
 	}
 	return tx, nil
 }
@@ -468,19 +470,18 @@ func (ec *Client) getBlock(
 	for i, tx := range body.Transactions {
 		txs[i] = tx.tx
 		receipt := receipts[i]
-		gasUsed := new(big.Int).SetUint64(receipt.GasUsed)
-		gasPrice, err := effectiveGasPrice(txs[i], head.BaseFee)
 		if err != nil {
 			return nil, nil, fmt.Errorf("%w: failure getting effective gas price", err)
 		}
 		loadedTxs[i] = tx.LoadedTransaction()
 		loadedTxs[i].Transaction = txs[i]
-		loadedTxs[i].FeeAmount = new(big.Int).Mul(gasUsed, gasPrice)
-		if head.BaseFee != nil { // EIP-1559
-			loadedTxs[i].FeeBurned = new(big.Int).Mul(gasUsed, head.BaseFee)
-		} else {
-			loadedTxs[i].FeeBurned = nil
+
+		feeAmount, feeBurned, err := calculateGas(txs[i], receipt, head)
+		if err != nil {
+			return nil, nil, err
 		}
+		loadedTxs[i].FeeAmount = feeAmount
+		loadedTxs[i].FeeBurned = feeBurned
 		loadedTxs[i].Miner = MustChecksum(head.Coinbase.Hex())
 		loadedTxs[i].Receipt = receipt
 
@@ -494,6 +495,27 @@ func (ec *Client) getBlock(
 	}
 
 	return types.NewBlockWithHeader(&head).WithBody(txs, uncles), loadedTxs, nil
+}
+
+func calculateGas(
+	tx *types.Transaction,
+	txReceipt *types.Receipt,
+	head types.Header,
+) (
+	*big.Int, *big.Int, error,
+) {
+	gasUsed := new(big.Int).SetUint64(txReceipt.GasUsed)
+	gasPrice, err := effectiveGasPrice(tx, head.BaseFee)
+	if err != nil {
+		return nil, nil, fmt.Errorf("%w: failure getting effective gas price", err)
+	}
+	feeAmount := new(big.Int).Mul(gasUsed, gasPrice)
+	var feeBurned *big.Int
+	if head.BaseFee != nil { // EIP-1559
+		feeBurned = new(big.Int).Mul(gasUsed, head.BaseFee)
+	}
+
+	return feeAmount, feeBurned, nil
 }
 
 // effectiveGasPrice returns the price of gas charged to this transaction to be included in the
