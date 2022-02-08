@@ -271,10 +271,6 @@ func (ec *Client) Transaction(
 		}
 	}
 
-	if err != nil {
-		return nil, fmt.Errorf("%w: failure getting effective gas price", err)
-	}
-
 	loadedTx := body.LoadedTransaction()
 	loadedTx.Transaction = body.tx
 	feeAmount, feeBurned, err := calculateGas(body.tx, receipt, *header)
