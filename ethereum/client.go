@@ -1261,10 +1261,14 @@ func (ec *Client) populateTransaction(
 // for a given block height.
 //
 // Source:
-// https://github.com/ethereum/go-ethereum/blob/master/consensus/ethash/consensus.go#L646-L653
+// https://github.com/ethereum/go-ethereum/master/consensus/ethash/consensus.go#L619-L645
 func (ec *Client) miningReward(
 	currentBlock *big.Int,
 ) int64 {
+	if currentBlock.Int64() == int64(0) {
+		return big.NewInt(0).Int64()
+	}
+
 	blockReward := ethash.FrontierBlockReward.Int64()
 	if ec.p.IsByzantium(currentBlock) {
 		blockReward = ethash.ByzantiumBlockReward.Int64()
