@@ -9,6 +9,7 @@ on:
 env:
   go_version: 1.16
   GO111MODULE: on
+  COVERALLS_TOKEN: ${{ secrets.COVERALLS_TOKEN }}
 
 jobs:
   Build:
@@ -60,7 +61,8 @@ jobs:
       - uses: actions/setup-go@v3
         with:
           go-version: ${{ env.go_version }}
-      - run: make coverage
+      - run: echo "$COVERALLS_TOKEN"
+      - run: make coverage COVERALLS_TOKEN="$COVERALLS_TOKEN"
 
   Salus:
     runs-on: ubuntu-latest

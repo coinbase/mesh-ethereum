@@ -100,7 +100,7 @@ spellcheck:
 
 coverage:
 	${GOVERALLS_INSTALL}
-	if [ "${COVERALLS_TOKEN}" ]; then ${TEST_SCRIPT} -coverprofile=c.out -covermode=count; ${GOVERALLS_CMD} -coverprofile=c.out -repotoken ${COVERALLS_TOKEN}; fi
+	if [ "$(COVERALLS_TOKEN)" ]; then ${TEST_SCRIPT} -coverprofile=c.out -covermode=count; ${GOVERALLS_CMD} -coverprofile=c.out -repotoken $(COVERALLS_TOKEN); fi
 
 coverage-local:
 	${TEST_SCRIPT} -cover
