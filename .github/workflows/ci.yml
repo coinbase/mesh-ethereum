@@ -8,6 +8,7 @@ on:
 
 env:
   go_version: 1.16
+  GO111MODULE: on
 
 jobs:
   Build:
