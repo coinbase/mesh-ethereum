@@ -33,7 +33,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v3
         with:
-          go-version: ${{ env.go_version }
+          go-version: ${{ env.go_version }}
       - uses: golangci/golangci-lint-action@v3
         with:
           version: latest
@@ -48,7 +48,7 @@ jobs:
           version: latest
       - uses: actions/setup-go@v3
         with:
-          go-version: ${{ env.go_version }
+          go-version: ${{ env.go_version }}
       - run: make check-license
 
   Coverage:
@@ -59,7 +59,7 @@ jobs:
           version: latest
       - uses: actions/setup-go@v3
         with:
-          go-version: ${{ env.go_version }
+          go-version: ${{ env.go_version }}
       - run: make coverage
 
   Salus:
