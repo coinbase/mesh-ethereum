@@ -33,13 +33,13 @@ jobs:
       - uses: golangci/golangci-lint-action@v3
         with:
           version: latest
-      - run: make lint
+          args: --timeout 3m
+      - run: make check-comments
 
   Check-License:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: golangci/golangci-lint-action@v3
         with:
           version: latest
       - run: make check-license
@@ -48,16 +48,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: golangci/golangci-lint-action@v3
         with:
           version: latest
+
       - run: make coverage
 
   Salus:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: golangci/golangci-lint-action@v3
         with:
           version: latest
       - run: make salus
@@ -66,7 +65,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: golangci/golangci-lint-action@v3
         with:
           version: latest
       - run: make check-format
