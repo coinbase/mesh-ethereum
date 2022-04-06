@@ -23,7 +23,7 @@ USE AT YOUR OWN RISK! COINBASE ASSUMES NO RESPONSIBILITY OR LIABILITY IF THERE I
 `rosetta-ethereum` provides a reference implementation of the Rosetta API for Ethereum in Golang. If you haven't heard of the Rosetta API, you can find more information [here](https://rosetta-api.org).
 
 ## Features
-* Comprehensive tracking of all ETH balance changes
+* Ccomprehensive tracking of all ETH balance changes
 * Stateless, offline, curve-based transaction construction (with address checksum validation)
 * Atomic balance lookups using go-ethereum's GraphQL Endpoint
 * Idempotent access to all transaction traces and receipts
