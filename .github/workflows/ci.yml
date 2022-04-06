@@ -61,7 +61,6 @@ jobs:
       - uses: actions/setup-go@v3
         with:
           go-version: ${{ env.go_version }}
-      - run: echo "$COVERALLS_TOKEN"
       - run: make coverage COVERALLS_TOKEN="$COVERALLS_TOKEN"
 
   Salus:
