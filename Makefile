@@ -3,9 +3,10 @@
 	spellcheck salus build-local format check-format update-tracer test coverage coverage-local \
 	update-bootstrap-balances mocks
 
+ADDLICENSE_IGNORE=-ignore ".github/**/*" -ignore ".idea/**/*"
 ADDLICENSE_INSTALL=go install github.com/google/addlicense@latest
 ADDLICENSE_CMD=addlicense
-ADDLICENCE_SCRIPT=${ADDLICENSE_CMD} -c "Coinbase, Inc." -l "apache" -v
+ADDLICENCE_SCRIPT=${ADDLICENSE_CMD} -c "Coinbase, Inc." -l "apache" -v ${ADDLICENSE_IGNORE}
 SPELLCHECK_CMD=go run github.com/client9/misspell/cmd/misspell
 GOLINES_INSTALL=go install github.com/segmentio/golines@latest
 GOLINES_CMD=golines
@@ -14,7 +15,7 @@ GOLINT_CMD=golint
 GOVERALLS_INSTALL=go install github.com/mattn/goveralls@latest
 GOVERALLS_CMD=goveralls
 GOIMPORTS_CMD=go run golang.org/x/tools/cmd/goimports
-GO_PACKAGES=./services/... ./cmd/... ./configuration/... ./ethereum/... 
+GO_PACKAGES=./services/... ./cmd/... ./configuration/... ./ethereum/...
 GO_FOLDERS=$(shell echo ${GO_PACKAGES} | sed -e "s/\.\///g" | sed -e "s/\/\.\.\.//g")
 TEST_SCRIPT=go test ${GO_PACKAGES}
 LINT_SETTINGS=golint,misspell,gocyclo,gocritic,whitespace,goconst,gocognit,bodyclose,unconvert,lll,unparam
@@ -99,7 +100,7 @@ spellcheck:
 
 coverage:
 	${GOVERALLS_INSTALL}
-	if [ "${COVERALLS_TOKEN}" ]; then ${TEST_SCRIPT} -coverprofile=c.out -covermode=count; ${GOVERALLS_CMD} -coverprofile=c.out -repotoken ${COVERALLS_TOKEN}; fi
+	if [ "$(COVERALLS_TOKEN)" ]; then ${TEST_SCRIPT} -coverprofile=c.out -covermode=count; ${GOVERALLS_CMD} -coverprofile=c.out -repotoken $(COVERALLS_TOKEN); fi
 
 coverage-local:
 	${TEST_SCRIPT} -cover
