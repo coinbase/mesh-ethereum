@@ -13,6 +13,7 @@ This repository contains a sample implementation of Rosetta API for the Ethereum
 </p>
 <!-- Badges -->
 <p align="center">
+  ![Github Actions](https://github.com/coinbase/rosetta-ethereum/actions/workflows/ci.yml/badge.svg)
   <a href="https://circleci.com/gh/coinbase/rosetta-ethereum/tree/master"><img src="https://circleci.com/gh/coinbase/rosetta-ethereum/tree/master.svg?style=shield" /></a>
   <a href="https://coveralls.io/github/coinbase/rosetta-ethereum"><img src="https://coveralls.io/repos/github/coinbase/rosetta-ethereum/badge.svg" /></a>
   <a href="https://goreportcard.com/report/github.com/coinbase/rosetta-ethereum"><img src="https://goreportcard.com/badge/github.com/coinbase/rosetta-ethereum" /></a>
@@ -53,10 +54,9 @@ Jump to:
 <!-- h2 How to Use This Repo -->
 ## How to Use This Repo
 
-1. Finish reading this README file.
-2. Fork the repo.
-3. Start playing with the code.
-4. [Deploy a node in Docker](#docker-deployment) to begin testing.
+1. Fork the repo.
+2. Start playing with the code.
+3. [Deploy a node in Docker](#docker-deployment) to begin testing.
 <!-- h3 System Requirements -->
 ### System Requirements
 
