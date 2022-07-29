@@ -13,8 +13,8 @@ This repository contains a sample implementation of Rosetta API for the Ethereum
 </p>
 <!-- Badges -->
 <p align="center">
-  ![Github Actions](https://github.com/coinbase/rosetta-ethereum/actions/workflows/ci.yml/badge.svg)
-  <a href="https://circleci.com/gh/coinbase/rosetta-ethereum/tree/master"><img src="https://circleci.com/gh/coinbase/rosetta-ethereum/tree/master.svg?style=shield" /></a>
+  <a href="https://actions-badge.atrox.dev/coinbase/rosetta-ethereum/goto?ref=master"><img alt="Build Status" src="https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2Fcoinbase%2Frosetta-ethereum%2Fbadge%3Fref%3Dmaster&style=popout" /></a>
+  <!-- <a href="https://circleci.com/gh/coinbase/rosetta-ethereum/tree/master"><img src="https://circleci.com/gh/coinbase/rosetta-ethereum/tree/master.svg?style=shield" /></a> -->
   <a href="https://coveralls.io/github/coinbase/rosetta-ethereum"><img src="https://coveralls.io/repos/github/coinbase/rosetta-ethereum/badge.svg" /></a>
   <a href="https://goreportcard.com/report/github.com/coinbase/rosetta-ethereum"><img src="https://goreportcard.com/badge/github.com/coinbase/rosetta-ethereum" /></a>
   <a href="https://github.com/coinbase/rosetta-ethereum/blob/master/LICENSE.txt"><img src="https://img.shields.io/github/license/coinbase/rosetta-ethereum.svg" /></a>
