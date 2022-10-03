@@ -2487,7 +2487,9 @@ func TestBlock_468194(t *testing.T) {
 }
 
 // Block with EIP-1559 base fee & txs. This block taken from mainnet:
-//   https://etherscan.io/block/0x68985b6b06bb5c6012393145729babb983fc16c50ec5207972ddda02de02f7e2
+//
+//	https://etherscan.io/block/0x68985b6b06bb5c6012393145729babb983fc16c50ec5207972ddda02de02f7e2
+//
 // This block has 7 transactions, all EIP-1559 type except the last.
 func TestBlock_13998626(t *testing.T) {
 	mockJSONRPC := &mocks.JSONRPC{}

@@ -255,6 +255,9 @@ docker run -d --rm --ulimit "nofile=100000:100000" -v "$(pwd)/ethereum-data:/dat
 Cloned repo:
 ```text
 make run-testnet-online
+// to send some funds into your testnet account you can use the following commands
+geth attach http://127.0.0.1:8545
+> eth.sendTransaction({from: eth.coinbase, to: "0x9C639954BC9956598Df734994378A36f73cfba0C", value: web3.toWei(50, "ether")})
 ```
 
 **`Testnet:Online`** (Remote)

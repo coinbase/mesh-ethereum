@@ -132,7 +132,7 @@ func LoadConfiguration() (*Configuration, error) {
 		config.GenesisBlockIdentifier = ethereum.MainnetGenesisBlockIdentifier
 		config.Params = params.MainnetChainConfig
 		config.GethArguments = ethereum.MainnetGethArguments
-	case Testnet, Ropsten:
+	case Ropsten:
 		config.Network = &types.NetworkIdentifier{
 			Blockchain: ethereum.Blockchain,
 			Network:    ethereum.RopstenNetwork,
@@ -156,6 +156,14 @@ func LoadConfiguration() (*Configuration, error) {
 		config.GenesisBlockIdentifier = ethereum.GoerliGenesisBlockIdentifier
 		config.Params = params.GoerliChainConfig
 		config.GethArguments = ethereum.GoerliGethArguments
+	case Testnet:
+		config.Network = &types.NetworkIdentifier{
+			Blockchain: ethereum.Blockchain,
+			Network:    ethereum.DevNetwork,
+		}
+		config.GenesisBlockIdentifier = nil
+		config.Params = params.AllCliqueProtocolChanges
+		config.GethArguments = ethereum.DevGethArguments
 	case "":
 		return nil, errors.New("NETWORK must be populated")
 	default:
