@@ -20,7 +20,6 @@ import (
 	"github.com/coinbase/rosetta-ethereum/configuration"
 	"github.com/coinbase/rosetta-ethereum/ethereum"
 
-	"github.com/coinbase/rosetta-sdk-go/asserter"
 	"github.com/coinbase/rosetta-sdk-go/types"
 )
 
@@ -84,10 +83,6 @@ func (s *NetworkAPIService) NetworkStatus(
 	currentBlock, currentTime, syncStatus, peers, err := s.client.Status(ctx)
 	if err != nil {
 		return nil, wrapErr(ErrGeth, err)
-	}
-
-	if currentTime < asserter.MinUnixEpoch {
-		return nil, ErrGethNotReady
 	}
 
 	return &types.NetworkStatusResponse{
