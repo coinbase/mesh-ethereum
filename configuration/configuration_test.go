@@ -148,14 +148,14 @@ func TestLoadConfiguration(t *testing.T) {
 			cfg: &Configuration{
 				Mode: Online,
 				Network: &types.NetworkIdentifier{
-					Network:    ethereum.RopstenNetwork,
+					Network:    ethereum.DevNetwork,
 					Blockchain: ethereum.Blockchain,
 				},
-				Params:                 params.RopstenChainConfig,
-				GenesisBlockIdentifier: ethereum.RopstenGenesisBlockIdentifier,
+				Params:                 params.AllCliqueProtocolChanges,
+				GenesisBlockIdentifier: nil,
 				Port:                   1000,
 				GethURL:                DefaultGethURL,
-				GethArguments:          ethereum.RopstenGethArguments,
+				GethArguments:          ethereum.DevGethArguments,
 				SkipGethAdmin:          true,
 			},
 		},
