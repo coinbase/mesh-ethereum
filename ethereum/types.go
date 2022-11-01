@@ -46,6 +46,10 @@ const (
 	// in GoerliNetworkNetworkIdentifier.
 	GoerliNetwork string = "Goerli"
 
+	// DevNetwork is the value of the network
+	// in DevNetworkNetworkIdentifier.
+	DevNetwork string = "Dev"
+
 	// Symbol is the symbol value
 	// used in Currency.
 	Symbol = "ETH"
@@ -135,6 +139,9 @@ var (
 
 	// GoerliGethArguments are the arguments to start a ropsten geth instance.
 	GoerliGethArguments = fmt.Sprintf("%s --goerli", MainnetGethArguments)
+
+	// DevGethArguments are the arguments to start a dev geth instance.
+	DevGethArguments = fmt.Sprintf("%s --dev", MainnetGethArguments)
 
 	// MainnetGenesisBlockIdentifier is the *types.BlockIdentifier
 	// of the mainnet genesis block.
