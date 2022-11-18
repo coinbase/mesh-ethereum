@@ -1,0 +1,17 @@
+[Eth]
+SyncMode = "full"
+
+[Node]
+DataDir = "./data"
+NoUSB = true
+HTTPHost = "0.0.0.0"
+HTTPPort = 8545
+HTTPVirtualHosts = ["*"]
+GraphQLVirtualHosts = ["*"]
+HTTPModules = ["eth", "debug", "admin", "txpool"]
+IPCPath = ""
+
+[Node.HTTPTimeouts]
+ReadTimeout = 120000000000
+WriteTimeout = 120000000000
+IdleTimeout = 120000000000

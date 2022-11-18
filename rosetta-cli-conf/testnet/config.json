@@ -6,8 +6,8 @@
   "data_directory": "cli-data",
   "http_timeout": 300,
   "max_retries": 15,
-  "max_online_connections": 500,
-  "max_sync_concurrency": 64,
+  "max_online_connections": 50,
+  "max_sync_concurrency": 16,
   "tip_delay": 120,
   "compression_disabled":true,
   "memory_limit_disabled":true,
@@ -16,8 +16,8 @@
     "broadcast_limit": 5,
     "constructor_dsl_file": "ethereum.ros",
     "end_conditions": {
-      "create_account": 10,
-      "transfer": 20
+      "create_account": 2,
+      "transfer": 2
     }
   },
   "data": {

@@ -1,4 +1,4 @@
-# Copyright 2020 Coinbase, Inc.
+# Copyright 2022 Coinbase, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -50,15 +50,14 @@ RUN mv go-ethereum/build/bin/geth /app/geth \
 # Compile rosetta-ethereum
 FROM golang-builder as rosetta-builder
 
+# Copy binary from geth-builder
+COPY --from=geth-builder /app/geth /app/geth
+
 # Use native remote build context to build in any directory
 COPY . src
-RUN cd src \
-  && go build
 
-RUN mv src/rosetta-ethereum /app/rosetta-ethereum \
-  && mkdir /app/ethereum \
-  && mv src/ethereum/call_tracer.js /app/ethereum/call_tracer.js \
-  && mv src/ethereum/geth.toml /app/ethereum/geth.toml \
+RUN mv src/geth.toml /app/geth.toml \
+  && mv src/entrypoint.sh /app/entrypoint.sh \
   && rm -rf src
 
 ## Build Final Image
@@ -77,10 +76,12 @@ WORKDIR /app
 COPY --from=geth-builder /app/geth /app/geth
 
 # Copy binary from rosetta-builder
-COPY --from=rosetta-builder /app/ethereum /app/ethereum
-COPY --from=rosetta-builder /app/rosetta-ethereum /app/rosetta-ethereum
+COPY --from=rosetta-builder /app /app
 
 # Set permissions for everything added to /app
 RUN chmod -R 755 /app/*
 
-CMD ["/app/rosetta-ethereum", "run"]
+EXPOSE 8545 8546 30303 30303/udp
+
+ENTRYPOINT ["/app/entrypoint.sh"]
+
