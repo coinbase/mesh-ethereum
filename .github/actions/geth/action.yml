@@ -1,0 +1,30 @@
+name: 'Geth Action'
+description: 'Private chain of Ethereum for test using geth'
+outputs:
+  rpc_url:
+    description: "url of JSON RPC"
+    value: http://localhost:8546
+  address:
+    description: "account of address"
+    value: "0x791ab321d86ca11fed3afdff3e1b6bad093d1220"
+  private_key:
+    description: "account of private key"
+    value: "0xde665c1c4bb8a5b74386dd8fb17dd2ba9a59db6cc11aea4d27ebdc5ecf46c13c"
+  password:
+    description: "account of passowrd"
+    value: "password"
+  network_id:
+    description: "network id"
+    value: "12345"
+  chain_id:
+    description: "chain id"
+    value: "12345"
+runs:
+  using: "composite"
+  steps:
+    - id: init
+      run: cd ${{ github.action_path }}; docker-compose run --rm geth ./scripts/init.sh
+      shell: bash
+    - id: run
+      run: cd ${{ github.action_path }}; docker-compose up -d
+      shell: bash

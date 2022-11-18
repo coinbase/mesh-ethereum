@@ -12,14 +12,41 @@ env:
   COVERALLS_TOKEN: ${{ secrets.COVERALLS_TOKEN }}
 
 jobs:
-  Build:
+  Rosetta-Validation:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-go@v3
-        with:
-          go-version: ${{ env.go_version }}
-      - run: make build
+    - uses: actions/checkout@v3
+
+    - name: Start a private ethereum network
+      uses: ./.github/actions/geth
+      id: geth
+
+    - name: Sleep for 20 seconds
+      run: sleep 20s
+      shell: bash
+
+    - name: Get latest block from geth node
+      run: |
+        curl -X POST "http://127.0.0.1:8546" --header 'Content-Type: application/json' --data '{"jsonrpc":"2.0","method":"eth_getBlockByNumber","params":["latest", true],"id":1}'
+      shell: bash
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install web3
+
+    - name: Populate transactions
+      run: python .github/scripts/populate_txns.py
+      shell: bash
+
+    - name: Start Rosetta Server
+      run: .github/scripts/setup.sh
+      shell: bash
+
+    - name: Run Check:data test
+      run: .github/scripts/cli.sh
+      shell: bash
+
   Test:
     runs-on: ubuntu-latest
     steps:
@@ -39,7 +66,6 @@ jobs:
         with:
           version: latest
           args: --timeout 3m
-      - run: make check-comments
 
   Check-License:
     runs-on: ubuntu-latest
@@ -52,16 +78,13 @@ jobs:
           go-version: ${{ env.go_version }}
       - run: make check-license
 
-  Coverage:
+  Check-format:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
         with:
           version: latest
-      - uses: actions/setup-go@v3
-        with:
-          go-version: ${{ env.go_version }}
-      - run: make coverage COVERALLS_TOKEN="$COVERALLS_TOKEN"
+      - run: make check-format
 
   Salus:
     runs-on: ubuntu-latest
@@ -70,11 +93,6 @@ jobs:
         with:
           version: latest
       - run: make salus
+  
 
-  Check-format:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          version: latest
-      - run: make check-format
+  
