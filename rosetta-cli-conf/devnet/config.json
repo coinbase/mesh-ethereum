@@ -1,0 +1,114 @@
+{
+  "network": {
+    "blockchain": "Ethereum",
+    "network": "Mainnet"
+  },
+  "online_url": "http://localhost:8080",
+  "data_directory": "cli-data",
+  "http_timeout": 300,
+  "max_retries": 15,
+  "max_online_connections": 50,
+  "max_sync_concurrency": 16,
+  "tip_delay": 120,
+  "compression_disabled":true,
+  "construction": {
+    "offline_url": "http://localhost:8081",
+    "stale_depth": 3,
+    "broadcast_limit": 5,
+    "constructor_dsl_file": "ethereum_erc20.ros",
+    "prefunded_accounts":[
+      {
+        "privkey":"de665c1c4bb8a5b74386dd8fb17dd2ba9a59db6cc11aea4d27ebdc5ecf46c13c",
+        "account_identifier":{
+          "address":"0x622Fbe99b3A378FAC736bf29d7e23B85E18816eB"
+        },
+        "curve_type":"secp256k1",
+        "currency":{
+          "symbol":"ETH",
+          "decimals": 18
+        }
+      },
+      {
+        "privkey":"9e5a7d25119ad38b0b66f89b3d6c492240f1a5484bc755c778bac209dbd4e2a5",
+        "account_identifier":{
+          "address":"0x791Ab321d86Ca11feD3AfDff3e1b6bAD093d1220"
+        },
+        "curve_type":"secp256k1",
+        "currency":{
+          "symbol":"ETH",
+          "decimals": 18
+        }
+      },
+      {
+        "privkey":"f78955a540221936a4eba0edd96547fc400d44f7f2107be4c7e72f6076a649d1",
+        "account_identifier":{
+          "address":"0x4cdBd835fE18BD93ccA39A262Cff72dbAC99E24F"
+        },
+        "curve_type":"secp256k1",
+        "currency":{
+          "symbol":"ETH",
+          "decimals": 18
+        }
+      },
+      {
+        "privkey":"de665c1c4bb8a5b74386dd8fb17dd2ba9a59db6cc11aea4d27ebdc5ecf46c13c",
+        "account_identifier":{
+          "address":"0x622Fbe99b3A378FAC736bf29d7e23B85E18816eB"
+        },
+        "curve_type":"secp256k1",
+        "currency": {
+          "symbol": "USDC",
+          "decimals": 6,
+          "metadata": {
+              "contractAddress": "0x62F3712A8A2bF3482F9Aa42F2C8296CF50774DDD"
+          }
+      }
+      },
+      {
+        "privkey":"9e5a7d25119ad38b0b66f89b3d6c492240f1a5484bc755c778bac209dbd4e2a5",
+        "account_identifier":{
+          "address":"0x791Ab321d86Ca11feD3AfDff3e1b6bAD093d1220"
+        },
+        "curve_type":"secp256k1",
+        "currency": {
+          "symbol": "USDC",
+          "decimals": 6,
+          "metadata": {
+              "contractAddress": "0x62F3712A8A2bF3482F9Aa42F2C8296CF50774DDD"
+          }
+      }
+      },
+      {
+        "privkey":"f78955a540221936a4eba0edd96547fc400d44f7f2107be4c7e72f6076a649d1",
+        "account_identifier":{
+          "address":"0x4cdBd835fE18BD93ccA39A262Cff72dbAC99E24F"
+        },
+        "curve_type":"secp256k1",
+        "currency": {
+          "symbol": "USDC",
+          "decimals": 6,
+          "metadata": {
+              "contractAddress": "0x62F3712A8A2bF3482F9Aa42F2C8296CF50774DDD"
+          }
+      }
+      }
+    ],
+    "end_conditions": {
+      "transfer": 1,
+      "erc20_transfer": 1
+    }
+  },
+  "data": {
+    "initial_balance_fetch_disabled":true,
+    "active_reconciliation_concurrency": 32,
+    "bootstrap_balances": "",
+    "exempt_accounts": "exempt_accounts.json",
+    "interesting_accounts": "",
+    "end_conditions": {
+      "reconciliation_coverage": {
+        "coverage": 0.95,
+        "from_tip": true
+      }
+    }
+  }
+}

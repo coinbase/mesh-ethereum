@@ -269,8 +269,8 @@ func LoadConfiguration() (*configuration.Configuration, error) {
 			Symbol:   "ETH",
 			Decimals: 18,
 		},
-		TracePrefix: "",
-		FilterTokens:  tokenFilterValue,
+		TracePrefix:    "",
+		FilterTokens:   tokenFilterValue,
 		TokenWhiteList: payload,
 	}
 

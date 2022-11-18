@@ -14,7 +14,7 @@ GOLINT_CMD=golint
 GOVERALLS_INSTALL=go install github.com/mattn/goveralls@latest
 GOVERALLS_CMD=goveralls
 GOIMPORTS_CMD=go run golang.org/x/tools/cmd/goimports
-GO_PACKAGES=./client/... ./config/...
+GO_PACKAGES=./services/... ./cmd/... ./configuration/... ./ethereum/... 
 GO_FOLDERS=$(shell echo ${GO_PACKAGES} | sed -e "s/\.\///g" | sed -e "s/\/\.\.\.//g")
 TEST_SCRIPT=go test ${GO_PACKAGES}
 LINT_SETTINGS=golint,misspell,gocyclo,gocritic,whitespace,goconst,gocognit,bodyclose,unconvert,lll,unparam
@@ -39,5 +39,9 @@ run-geth-testnet:
 run-rosetta:
 	MODE=ONLINE NETWORK=MAINNET PORT=8080 FILTER=false go run *.go
 
-up:
-	docker compose up geth-ethereum-mainnet
+run-rosetta-offline:
+	MODE=OFFLINE NETWORK=MAINNET PORT=8081 FILTER=false go run *.go
+
+local-geth:
+	cd ../../.github/actions/geth; docker-compose run --rm geth ./scripts/init.sh;
+	cd ../../.github/actions/geth; docker-compose up geth

@@ -13,7 +13,7 @@ geth \
     --http.port 8545 \
     --http.vhosts '*' \
     --http.api 'personal,eth,net,web3,txpool,miner,debug' \
-    --networkid '12345' \
+    --networkid '1' \
     --mine \
     --miner.etherbase '0x4cdBd835fE18BD93ccA39A262Cff72dbAC99E24F' \
     --miner.gasprice 0 \
