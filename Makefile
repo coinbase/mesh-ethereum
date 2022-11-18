@@ -43,5 +43,5 @@ run-rosetta-offline:
 	MODE=OFFLINE NETWORK=MAINNET PORT=8081 FILTER=false go run *.go
 
 local-geth:
-	cd ../../.github/actions/geth; docker-compose run --rm geth ./scripts/init.sh;
-	cd ../../.github/actions/geth; docker-compose up geth
+	cd .github/actions/geth; docker-compose run --rm geth ./scripts/init.sh;
+	cd .github/actions/geth; docker-compose up geth
