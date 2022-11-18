@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - use-geth-sdk
   pull_request:
 
 env:
