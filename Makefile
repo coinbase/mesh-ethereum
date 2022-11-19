@@ -27,9 +27,6 @@ deps:
 test:
 	${TEST_SCRIPT}
 
-build-geth:
-	docker build -t rosetta-ethereum:latest .
-
 run-geth-mainnet:
 	docker run -d --rm --ulimit "nofile=${NOFILE}:${NOFILE}" -e "NETWORK=MAINNET" -p 8545:8545 -p 30303:30303 rosetta-ethereum:latest
 
