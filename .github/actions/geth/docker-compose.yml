@@ -12,10 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-version: 2
+version: '3'
 
-updates:
-  - package-ecosystem: "gomod"
-    directory: "/"
-    schedule:
-      interval: "daily"
+services:
+  geth:
+    image: ethereum/client-go:v1.10.23
+    environment:
+      - DEVMODE=true
+    volumes:
+      - "./.ethereum:/root/.ethereum"
+      - "./config:/root/config"
+      - "./scripts:/root/scripts"
+    working_dir: /root
+    entrypoint: sh
+    ports:
+      - "8546:8545"
+    command: ./scripts/run.sh
+
