@@ -3,7 +3,7 @@ module github.com/coinbase/rosetta-ethereum
 go 1.19
 
 require (
-	github.com/coinbase/rosetta-geth-sdk v0.0.2
+	github.com/coinbase/rosetta-geth-sdk v0.0.3
 	github.com/coinbase/rosetta-sdk-go v0.8.1
 	github.com/ethereum/go-ethereum v1.10.26
 	github.com/stretchr/testify v1.8.1

@@ -94,8 +94,8 @@ github.com/chzyer/test v0.0.0-20180213035817-a1ea475d72b1/go.mod h1:Q3SI9o4m/ZMn
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
 github.com/cloudflare/cloudflare-go v0.14.0/go.mod h1:EnwdgGMaFOruiPZRFSgn+TsQ3hQ7C/YWzIGLeu5c304=
 github.com/coinbase/kryptology v1.8.0/go.mod h1:RYXOAPdzOGUe3qlSFkMGn58i3xUA8hmxYHksuq+8ciI=
-github.com/coinbase/rosetta-geth-sdk v0.0.2 h1:fUMBIoVs2hTJzxGpcHejTYX09k4lL9M9ubp1GqkLOx4=
-github.com/coinbase/rosetta-geth-sdk v0.0.2/go.mod h1:z8UygO+4oDwEdIIsqAWZXp37jGGhcqsoJ/4eszTl3NU=
+github.com/coinbase/rosetta-geth-sdk v0.0.3 h1:OSbHmToxwks0cDrbw88zgOGEPaDgegZfHN0KD4aIH3Q=
+github.com/coinbase/rosetta-geth-sdk v0.0.3/go.mod h1:z8UygO+4oDwEdIIsqAWZXp37jGGhcqsoJ/4eszTl3NU=
 github.com/coinbase/rosetta-sdk-go v0.7.11/go.mod h1:HLTqSTSnOGLWHGTxoUJQO2TLuKkas1B9i/7ByerK6lM=
 github.com/coinbase/rosetta-sdk-go v0.8.1 h1:WE+Temc8iz7Ra7sCpV9ymBJx78vItqFJ2xcSiPet1Pc=
 github.com/coinbase/rosetta-sdk-go v0.8.1/go.mod h1:tXPR6AIW9ogsH4tYIaFOKOgfJNanCvcyl7JKLd4DToc=
