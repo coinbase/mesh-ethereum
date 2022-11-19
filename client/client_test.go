@@ -16,7 +16,7 @@ package client
 
 import (
 	"context"
-	"io/ioutil"
+	"os"
 	"math/big"
 
 	"testing"
@@ -48,7 +48,7 @@ func TestCall_GetTransactionReceipt(t *testing.T) {
 		func(args mock.Arguments) {
 			r := args.Get(1).(**EthTypes.Receipt)
 
-			file, err := ioutil.ReadFile(
+			file, err := os.ReadFile(
 				"testdata/tx_receipt_0x0046a7c3ca126864a3e851235ca6bf030300f9138f035f5f190e59ff9a4b22ff.json",
 			)
 			assert.NoError(t, err)
