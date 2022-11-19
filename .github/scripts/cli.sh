@@ -4,4 +4,4 @@
 curl -sSfL https://raw.githubusercontent.com/coinbase/rosetta-cli/master/scripts/install.sh | sh -s
 
 echo "start check:data"
-./bin/rosetta-cli --configuration-file examples/ethereum/rosetta-cli-conf/devnet/config.json check:data --start-block 0
+./bin/rosetta-cli --configuration-file rosetta-cli-conf/devnet/config.json check:data --start-block 0
