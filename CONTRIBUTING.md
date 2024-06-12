@@ -1,4 +1,4 @@
-# Contributing to rosetta-ethereum
+# Contributing to mesh-ethereum
 
 ## Code of Conduct
 
@@ -48,6 +48,6 @@ be locked to prevent further discussion.
 
 All support requests must be made via [our support team][3].
 
-[1]: https://github.com/coinbase/rosetta-ethereum/issues
+[1]: https://github.com/coinbase/mesh-ethereum/issues
 [2]: https://chris.beams.io/posts/git-commit/#seven-rules
 [3]: https://support.coinbase.com/customer/en/portal/articles/2288496-how-can-i-contact-coinbase-support-
