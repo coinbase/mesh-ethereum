@@ -18,7 +18,8 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"io/ioutil"
+	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"path"
@@ -64,9 +65,14 @@ func (g *GraphQLClient) Query(ctx context.Context, input string) (string, error)
 	if err != nil {
 		return "", err
 	}
-	defer response.Body.Close()
+	defer func() {
+		if cerr := response.Body.Close(); cerr != nil {
+			// Log or handle the error
+			fmt.Printf("Failed to close response body: %v", cerr)
+		}
+	}()
 
-	data, err := ioutil.ReadAll(response.Body)
+	data, err := io.ReadAll(response.Body)
 	if err != nil {
 		return "", err
 	}
