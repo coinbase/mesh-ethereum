@@ -23,7 +23,7 @@ Integrate your blockchain everywhere.
 <!-- Release cycle information -->
 
 <p align="center"><b>
-ROSETTA-ETHEREUM IS CONSIDERED <a href="https://en.wikipedia.org/wiki/Software_release_life_cycle#Alpha">ALPHA SOFTWARE</a>.
+MESH-ETHEREUM IS CONSIDERED <a href="https://en.wikipedia.org/wiki/Software_release_life_cycle#Alpha">ALPHA SOFTWARE</a>.
 USE AT YOUR OWN RISK.
 </b></p>
 
