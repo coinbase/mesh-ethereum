@@ -35,7 +35,7 @@ USE AT YOUR OWN RISK.
 
 The `mesh-ethereum` repository provides an implementation sample of the Mesh API for Ethereum in Golang. We created this repository for developers of Ethereum-like (a.k.a., account-based) blockchains, who may find it easier to fork this implementation sample than write one from scratch.
 
-[Mesh](https://www.mesh-api.org/docs/welcome.html) is an open-source specification and set of tools that makes integrating with blockchains simpler, faster, and more reliable. The Mesh API is specified in the [OpenAPI 3.0 format](https://www.openapis.org).
+[Mesh](https://docs.cdp.coinbase.com/mesh/docs/welcome/) is an open-source specification and set of tools that makes integrating with blockchains simpler, faster, and more reliable. The Mesh API is specified in the [OpenAPI 3.0 format](https://www.openapis.org).
 
 You can craft requests and responses with auto-generated code using [Swagger Codegen](https://swagger.io/tools/swagger-codegen) or [OpenAPI Generator](https://openapi-generator.tech). These requests and responses must be human-readable (easy to debug and understand), and able to be used in servers and browsers.
 
@@ -125,12 +125,7 @@ make build-local
 ```
 make coverage-local
 ```
-<!-- h2 Docker Deployment -->
-## Docker Deployment
 
-As specified in the [Mesh API Principles](https://www.mesh-api.org/docs/automated_deployment_testing.html), all Mesh implementations must be deployable via Docker and support running via either an [`online` or `offline` mode](https://www.mesh-api.org/docs/node_deployment.html#multiple-modes).
-
-**YOU MUST INSTALL DOCKER FOR THE FOLLOWING INSTRUCTIONS TO WORK. YOU CAN DOWNLOAD DOCKER [HERE](https://www.docker.com/get-started).**
 <!-- h2 Image Installation -->
 ### Image Installation
 
@@ -288,7 +283,7 @@ and run one of the following commands:
 * `mesh-cli check:construction --configuration-file mesh-cli-conf/testnet/config.json` - This command validates the Construction API implementation. It also verifies transaction construction, signing, and submissions to the `testnet` network.
 * `mesh-cli check:data --configuration-file mesh-cli-conf/mainnet/config.json` - This command validates that the Data API implementation is correct using the ethereum `mainnet` node. It also ensures that the implementation does not miss any balance-changing operations.
 
-Read the [How to Test your Mesh Implementation](https://www.mesh-api.org/docs/mesh_test.html) documentation for additional details.
+Read the [How to Test your Mesh Implementation](https://docs.cdp.coinbase.com/mesh/docs/mesh-test/) documentation for additional details.
 <!-- h2 Contributing -->
 ## Contributing
 
@@ -300,25 +295,14 @@ You may contribute to the `mesh-ethereum` project in various ways:
 
 Read our [Contributing](CONTRIBUTING.MD) documentation for more information.
 
-When you've finished an implementation for a blockchain, share your work in the [ecosystem category of the community site](https://community.mesh-api.org/c/ecosystem). Platforms looking for implementations for certain blockchains will be monitoring this section of the website for high-quality implementations they can use for integration. Make sure that your implementation meets the [expectations](https://www.mesh-api.org/docs/node_deployment.html) of any implementation.
-
 You can also find community implementations for a variety of blockchains in the [mesh-ecosystem](https://github.com/coinbase/mesh-ecosystem) repository.
 <!-- h2 Documentation -->
 ## Documentation
 
-You can find the Mesh API documentation at [mesh-api.org](https://www.mesh-api.org/docs/welcome.html).
+You can find the Mesh API documentation [here](https://docs.cdp.coinbase.com/mesh/docs/welcome/).
 
-Check out the [Getting Started](https://www.mesh-api.org/docs/getting_started.html) section to start diving into Mesh.
+Check out the [Getting Started](https://docs.cdp.coinbase.com/mesh/docs/getting-started/) section to start diving into Mesh.
 
-Our documentation is divided into the following sections:
-
-* [Product Overview](https://www.mesh-api.org/docs/welcome.html)
-* [Getting Started](https://www.mesh-api.org/docs/getting_started.html)
-* [Mesh API Spec](https://www.mesh-api.org/docs/Reference.html)
-* [Samples](https://www.mesh-api.org/docs/reference-implementations.html)
-* [Testing](https://www.mesh-api.org/docs/mesh_cli.html)
-* [Best Practices](https://www.mesh-api.org/docs/node_deployment.html)
-* [Repositories](https://www.mesh-api.org/docs/mesh_specifications.html)
 <!-- h2 Related Projects -->
 ## Related Projects
 
@@ -329,7 +313,7 @@ Our documentation is divided into the following sections:
 <!-- h3 Other Implementation Samples -->
 ### Other Implementation Samples
 
-You can find community implementations for a variety of blockchains in the [mesh-ecosystem](https://github.com/coinbase/mesh-ecosystem) repository, and in the [ecosystem category](https://community.mesh-api.org/c/ecosystem) of our community site.
+You can find community implementations for a variety of blockchains in the [mesh-ecosystem](https://github.com/coinbase/mesh-ecosystem) repository.
 
 <!-- h2 License and Copyright -->
 ## License
