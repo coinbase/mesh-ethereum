@@ -309,7 +309,7 @@ Check out the [Getting Started](https://docs.cdp.coinbase.com/mesh/docs/getting-
 * [mesh-geth-sdk](https://github.com/coinbase/mesh-geth-sdk) — This SDK helps accelerate Mesh API implementation on go-ethereum based chains.
 * [mesh-sdk-go](https://github.com/coinbase/mesh-sdk-go) — The `mesh-sdk-go` SDK provides a collection of packages used for interaction with the Mesh API specification.
 * [mesh-specifications](https://github.com/coinbase/mesh-specifications) — Much of the SDKs’ code is generated from this repository.
-* [mesh-cli](https://github.com/coinbase/mesh-ecosystem) — Use the `mesh-cli` tool to test your Mesh API implementation. The tool also provides the ability to look up block contents and account balances.
+* [mesh-cli](https://github.com/coinbase/mesh-cli) — Use the `mesh-cli` tool to test your Mesh API implementation. The tool also provides the ability to look up block contents and account balances.
 <!-- h3 Other Implementation Samples -->
 ### Other Implementation Samples
 
